@@ -25,6 +25,7 @@ a pair of latitude and longitude. An example Handlungsort field value is: Lausit
 import csv
 import os
 import sys
+import geocoder
 
 class Error(Exception):
 	"""
@@ -66,7 +67,9 @@ class GeocoderFactory(object):
 		@param geocoder_type: The type of the geocoder instance
 		@type geocoder_type: str
 		"""
-		return types.get(geocoder_type, 'google')
+		geocoder_type not in types:
+			raise Error('Invalid GeoCoder type')
+		return getattr(geocoder, geocoder_type)
 
 
 def main(input_file_path):
@@ -79,11 +82,20 @@ def main(input_file_path):
 	# validate that the input file path exist
 	if not os.path.exists(input_file_path):
 		raise Error('Input file [%s] does not exist' % input_file_path)
-
+	result = {}
+	geocoder = GeocoderFactory().get()
 	with open(input_file_path, 'rb') as fd:
 		reader = csv.DictReader(fd, delimiter=';')
 		for row in reader:
-			print(row['Handlungsorte'])
+			location_address = row['Handlungsorte']
+			article_id = row['DialogId']
+			if not location_address:
+				print('Artical [%s] does not have location set' % article_id)
+			geocoder_result = geocoder(location_address)
+			result[article_id] = {'lat': geocoder_result.latlng[0], 'long': geocoder_result.latlng[1],\
+								'bbox': geocoder_result.bbox}
+	print(result)
+
 
 
 if __name__ == '__main__':
