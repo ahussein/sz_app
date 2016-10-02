@@ -147,6 +147,7 @@ def main(input_file_path):
 	geocoder = GeocoderFactory().get()
 	with open(input_file_path, 'rb') as fd:
 		reader = UnicodeReader(fd, delimiter=';')
+		header = reader.next()
 		for row in reader:
 			location_address = row[-2]
 			article_id = row[0]
