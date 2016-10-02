@@ -144,6 +144,7 @@ def main(input_file_path):
 	if not os.path.exists(input_file_path):
 		raise Error('Input file [%s] does not exist' % input_file_path)
 	result = {}
+	errors = []
 	geocoder = GeocoderFactory().get()
 	with open(input_file_path, 'rb') as fd:
 		reader = UnicodeReader(fd, delimiter=';')
@@ -153,9 +154,16 @@ def main(input_file_path):
 			article_id = row[0]
 			if not location_address:
 				print('Artical [%s] does not have location set' % article_id)
-			geocoder_result = geocoder(location_address)
-			result[article_id] = {'lat': geocoder_result.latlng[0], 'long': geocoder_result.latlng[1],\
-								'bbox': geocoder_result.bbox}
+			else:
+				try:
+					geocoder_result = geocoder(location_address)
+
+					result[article_id] = {'lat': geocoder_result.latlng[0], 'long': geocoder_result.latlng[1],\
+									'bbox': geocoder_result.bbox}
+				except Exception, ex:
+					msg = 'Cannot get location for address [%s] associated with article [%s]' % (location_address, article_id)
+					errors.append(msg)
+	print(errors)
 	print(result)
 
 
