@@ -41,7 +41,7 @@ class GoogleGeocoder(object):
 		"""
 		Initialize geocoder
 		"""
-		self._api_string =  
+		self._api_string = '' 
 
 	def geocode(self, input):
 		"""
