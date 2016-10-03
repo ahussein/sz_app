@@ -174,8 +174,8 @@ def main(input_file_path):
 			else:
 				try:
 					geocoder_result = geocoder(location_address)
-					result[article_id] = {'lat': geocoder_result.latlng[0], 'long': geocoder_result.latlng[1],\
-									'bbox': geocoder_result.bbox}
+					result[article_id] = {'lalng': geocoder_result.latlng,
+											'bbox': geocoder_result.bbox}
 				except Exception, ex:
 					nr_of_records_with_failed_geocoding += 1
 					msg = 'Cannot get location for address [%s] associated with article [%s]. Error: [%s]' % (location_address, article_id, ex)
