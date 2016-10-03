@@ -143,7 +143,8 @@ Total number of records: %(nr_of_records)s
 Number of records with no location address: %(nr_location_records)s
 Number of records with failed geocoding: %(nr_failed_geocoding)s
 
-Errors: %(errors)s
+Errors: 
+%(errors)s
 """
 
 def main(input_file_path):
@@ -177,7 +178,7 @@ def main(input_file_path):
 									'bbox': geocoder_result.bbox}
 				except Exception, ex:
 					nr_of_records_with_failed_geocoding += 1
-					msg = 'Cannot get location for address [%s] associated with article [%s]' % (location_address, article_id)
+					msg = 'Cannot get location for address [%s] associated with article [%s]. Error: [%s]' % (location_address, article_id, ex)
 					errors.append(msg)
 	report = report_template % {'input_file_path': input_file_path,
 								'nr_location_records': nr_of_records_with_no_address,
