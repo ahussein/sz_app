@@ -138,6 +138,7 @@ report_template = \
 Geocoder report
 ================
 Input file: %(input_file_path)s
+Total number of records: %(nr_of_records)s
 
 Number of records with no location address: %(nr_location_records)s
 Number of records with failed geocoding: %(nr_failed_geocoding)s
@@ -163,7 +164,7 @@ def main(input_file_path):
 	with open(input_file_path, 'rb') as fd:
 		reader = UnicodeReader(fd, delimiter=';')
 		header = reader.next()
-		for row in reader:
+		for index, row in enumerate(reader):
 			location_address = row[-2]
 			article_id = row[0]
 			if not location_address:
@@ -181,7 +182,8 @@ def main(input_file_path):
 	report = report_template % {'input_file_path': input_file_path,
 								'nr_location_records': nr_of_records_with_no_address,
 								'nr_failed_geocoding': nr_of_records_with_failed_geocoding,
-								'errors': '\n'.join(errors)}
+								'errors': '\n'.join(errors),
+								'nr_of_records': index}
 	print(report)
 
 
