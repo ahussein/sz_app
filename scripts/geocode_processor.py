@@ -133,6 +133,18 @@ class GeocoderFactory(object):
 		return getattr(geocoder, geocoder_type)
 
 
+report_template = \
+"""
+Geocoder report
+================
+Input file: %(input_file_path)s
+
+Number of records with no location address: %(nr_location_records)s
+Number of records with failed geocoding: %(nr_failed_geocoding)s
+
+Errors: %(errors)s
+"""
+
 def main(input_file_path):
 	"""
 	Main entry point for the script, expect a csv file path and rewrite a new file with locoation attribute added
@@ -145,6 +157,8 @@ def main(input_file_path):
 		raise Error('Input file [%s] does not exist' % input_file_path)
 	result = {}
 	errors = []
+	nr_of_records_with_no_address = 0
+	nr_of_records_with_failed_geocoding = 0
 	geocoder = GeocoderFactory().get()
 	with open(input_file_path, 'rb') as fd:
 		reader = UnicodeReader(fd, delimiter=';')
@@ -153,19 +167,22 @@ def main(input_file_path):
 			location_address = row[-2]
 			article_id = row[0]
 			if not location_address:
-				print('Artical [%s] does not have location set' % article_id)
+				nr_of_records_with_no_address += 1
+				# print('Artical [%s] does not have location set' % article_id)
 			else:
 				try:
 					geocoder_result = geocoder(location_address)
-
 					result[article_id] = {'lat': geocoder_result.latlng[0], 'long': geocoder_result.latlng[1],\
 									'bbox': geocoder_result.bbox}
 				except Exception, ex:
+					nr_of_records_with_failed_geocoding += 1
 					msg = 'Cannot get location for address [%s] associated with article [%s]' % (location_address, article_id)
 					errors.append(msg)
-	print(errors)
-	print(result)
-
+	report = report_template % {'input_file_path': input_file_path,
+								'nr_location_records': nr_of_records_with_no_address,
+								'nr_failed_geocoding': nr_of_records_with_failed_geocoding,
+								'errors': '\n'.join(errors)}
+	print(report)
 
 
 if __name__ == '__main__':
