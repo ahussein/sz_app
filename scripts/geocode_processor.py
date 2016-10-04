@@ -147,6 +147,8 @@ Errors:
 %(errors)s
 """
 
+error_msg = 'Cannot get location for address [%s] associated with article [%s]. Error: [%s]'
+
 def main(input_file_path):
 	"""
 	Main entry point for the script, expect a csv file path and rewrite a new file with locoation attribute added
@@ -160,7 +162,6 @@ def main(input_file_path):
 	result = {}
 	errors = []
 	nr_of_records_with_no_address = 0
-	nr_of_records_with_failed_geocoding = 0
 	geocoder = GeocoderFactory().get()
 	with open(input_file_path, 'rb') as fd:
 		reader = UnicodeReader(fd, delimiter=';')
@@ -174,15 +175,18 @@ def main(input_file_path):
 			else:
 				try:
 					geocoder_result = geocoder(location_address)
-					result[article_id] = {'lalng': geocoder_result.latlng,
-											'bbox': geocoder_result.bbox}
+					if geocoder_result.ok is False:
+						msg =  error_msg % (location_address, article_id, geocoder_result)
+						errors.append(msg)
+					else:
+						result[article_id] = {'lalng': geocoder_result.latlng,
+												'bbox': geocoder_result.bbox}
 				except Exception, ex:
-					nr_of_records_with_failed_geocoding += 1
-					msg = 'Cannot get location for address [%s] associated with article [%s]. Error: [%s]' % (location_address, article_id, ex)
+					msg =  error_msg % (location_address, article_id, ex)
 					errors.append(msg)
 	report = report_template % {'input_file_path': input_file_path,
 								'nr_location_records': nr_of_records_with_no_address,
-								'nr_failed_geocoding': nr_of_records_with_failed_geocoding,
+								'nr_failed_geocoding': len(errors),
 								'errors': '\n'.join(errors),
 								'nr_of_records': index}
 	print(report)
