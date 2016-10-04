@@ -151,15 +151,15 @@ Errors:
 
 error_msg = 'Cannot get location for address [%s] associated with article [%s]. Error: [%s]'
 
-def main(input_file_path, geocoder='google'):
+def main(input_file_path, geocoder_type='google'):
 	"""
 	Main entry point for the script, expect a csv file path and rewrite a new file with locoation attribute added
 
 	@param input_file_path: path to the input csv file
 	@type input_file_path: str
 
-	@param geocoder: Geocoder service provide name
-	@type geocoder: str
+	@param geocoder_type: Geocoder service provide name
+	@type geocoder_type: str
 	"""
 	# validate that the input file path exist
 	if not os.path.exists(input_file_path):
@@ -167,7 +167,7 @@ def main(input_file_path, geocoder='google'):
 	result = {}
 	errors = []
 	nr_of_records_with_no_address = 0
-	geocoder = GeocoderFactory().get(geocoder_type=geocoder)
+	geocoder = GeocoderFactory().get(geocoder_type=geocoder_type)
 	with open(input_file_path, 'rb') as fd:
 		reader = UnicodeReader(fd, delimiter=';')
 		header = reader.next()
@@ -199,7 +199,7 @@ def main(input_file_path, geocoder='google'):
 
 if __name__ == '__main__':
 	input_file_path = sys.argv[1]
-	geocodder = None
+	geocoder_type = None
 	if len(sys.argv) == 3:
-		geocoder = sys.argv[2]
-	main(input_file_path, geocoder=geocoder)
+		geocoder_type = sys.argv[2]
+	main(input_file_path, geocoder_type=geocoder_type)
