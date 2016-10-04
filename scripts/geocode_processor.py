@@ -129,7 +129,7 @@ class GeocoderFactory(object):
 		@type geocoder_type: str
 		"""
 		if geocoder_type is None:
-			geocoder_type = 'google'
+			geocoder_type = DEFAULT_GEOCODER_TYPE
 		if geocoder_type not in self.types:
 			raise Error('Invalid GeoCoder type [%s]' % geocoder_type)
 		return getattr(geocoder, geocoder_type)
@@ -150,8 +150,9 @@ Errors:
 """
 
 error_msg = 'Cannot get location for address [%s] associated with article [%s]. Error: [%s]'
+DEFAULT_GEOCODER_TYPE = 'google'
 
-def main(input_file_path, geocoder_type='google'):
+def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 	"""
 	Main entry point for the script, expect a csv file path and rewrite a new file with locoation attribute added
 
@@ -167,7 +168,8 @@ def main(input_file_path, geocoder_type='google'):
 	result = {}
 	errors = []
 	nr_of_records_with_no_address = 0
-	geocoder = GeocoderFactory().get(geocoder_type=geocoder_type)
+	geocoder_obj = GeocoderFactory().get(geocoder_type=geocoder_type)
+	default_geocoder_obj = None
 	with open(input_file_path, 'rb') as fd:
 		reader = UnicodeReader(fd, delimiter=';')
 		header = reader.next()
@@ -179,8 +181,14 @@ def main(input_file_path, geocoder_type='google'):
 				# print('Artical [%s] does not have location set' % article_id)
 			else:
 				try:
-					geocoder_result = geocoder(location_address)
+					geocoder_result = geocoder_obj(location_address)
 					if geocoder_result.ok is False:
+						if geocoder_type != DEFAULT_GEOCODER_TYPE:
+							print("Failed to resolve address [%s] using geocoder [%s]. Trying default geocoder")
+							if default_geocoder_obj is None:
+								default_geocoder_obj = GeocoderFactory.get(geocoder_type=DEFAULT_GEOCODER_TYPE)
+							geocoder_result = default_geocoder_obj(location_address)
+					if geocoder_result.ok is False:	
 						msg =  error_msg % (location_address, article_id, geocoder_result)
 						errors.append(msg)
 					else:
