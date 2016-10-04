@@ -184,9 +184,9 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 					geocoder_result = geocoder_obj(location_address)
 					if geocoder_result.ok is False:
 						if geocoder_type != DEFAULT_GEOCODER_TYPE:
-							print("Failed to resolve address [%s] using geocoder [%s]. Trying default geocoder")
+							print("Failed to resolve address [%s] using geocoder [%s]. Trying default geocoder" % (location_address, geocoder_type))
 							if default_geocoder_obj is None:
-								default_geocoder_obj = GeocoderFactory.get(geocoder_type=DEFAULT_GEOCODER_TYPE)
+								default_geocoder_obj = GeocoderFactory().get(geocoder_type=DEFAULT_GEOCODER_TYPE)
 							geocoder_result = default_geocoder_obj(location_address)
 					if geocoder_result.ok is False:	
 						msg =  error_msg % (location_address, article_id, geocoder_result)
