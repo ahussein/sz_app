@@ -131,7 +131,7 @@ class GeocoderFactory(object):
 		if geocoder_type is None:
 			geocoder_type = 'google'
 		if geocoder_type not in self.types:
-			raise Error('Invalid GeoCoder type')
+			raise Error('Invalid GeoCoder type [%s]' % geocoder_type)
 		return getattr(geocoder, geocoder_type)
 
 
