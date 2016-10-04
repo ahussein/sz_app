@@ -121,13 +121,15 @@ class GeocoderFactory(object):
 	"""
 	types = ['google', 'komoot'] 
 
-	def get(self, geocoder_type='google'):
+	def get(self, geocoder_type=None):
 		"""
 		Get an instance of a geocoder
 
 		@param geocoder_type: The type of the geocoder instance
 		@type geocoder_type: str
 		"""
+		if geocoder_type is None:
+			geocoder_type = 'google'
 		if geocoder_type not in self.types:
 			raise Error('Invalid GeoCoder type')
 		return getattr(geocoder, geocoder_type)
@@ -197,6 +199,7 @@ def main(input_file_path, geocoder='google'):
 
 if __name__ == '__main__':
 	input_file_path = sys.argv[1]
+	geocodder = None
 	if len(sys.argv) == 3:
 		geocoder = sys.argv[2]
 	main(input_file_path, geocoder=geocoder)
