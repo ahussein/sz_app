@@ -191,8 +191,8 @@ def save_addess_cache(cache_file_path=None):
 	if cache_file_path is None:
 		cache_file_path = os.path.join(os.path.dirname(__file__), DEFAULT_CACHE_FILE_PATH)
 	
-	ADDRESS_CACHE = json.dump(ADDRESS_CACHE, open(cache_file_path, 'wb'))
-	
+	json.dump(ADDRESS_CACHE, open(cache_file_path, 'wb'))
+
 
 def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 	"""
