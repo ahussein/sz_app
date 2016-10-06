@@ -27,6 +27,7 @@ import os
 import sys
 import geocoder
 import json
+import click
 
 # handle unicode issues
 class UTF8Recoder:
@@ -183,7 +184,9 @@ def save_addess_cache(cache_file_path=None):
 	
 	json.dump(ADDRESS_CACHE, open(cache_file_path, 'wb'))
 
-
+@click.command()
+@click.option('--input_file_path', help="Path to the input csv file")
+@click.option('--geocoder_type', default=DEFAULT_GEOCODER_TYPE, help="Geocoder service provide name")
 def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 	"""
 	Main entry point for the script, expect a csv file path and rewrite a new file with locoation attribute added
@@ -257,10 +260,6 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 
 
 if __name__ == '__main__':
-	import click
-	@click.command()
-	@click.option('--input_file_path', help="Path to the input csv file")
-	@click.option('--geocoder_type', default=DEFAULT_GEOCODER_TYPE, help="Geocoder service provide name")
 	# input_file_path = sys.argv[1]
 	# geocoder_type = None
 	# if len(sys.argv) == 3:
