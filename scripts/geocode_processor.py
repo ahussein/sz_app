@@ -188,7 +188,7 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 	"""
 	Main entry point for the script, expect a csv file path and rewrite a new file with locoation attribute added
 
-	@param input_file_path: path to the input csv file
+	@param input_file_path: Path to the input csv file
 	@type input_file_path: str
 
 	@param geocoder_type: Geocoder service provide name
@@ -257,8 +257,12 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 
 
 if __name__ == '__main__':
-	input_file_path = sys.argv[1]
-	geocoder_type = None
-	if len(sys.argv) == 3:
-		geocoder_type = sys.argv[2]
+	import click
+	@click.command()
+	@click.option('--input_file_path', help="Path to the input csv file")
+	@click.option('--geocoder_type', default=DEFAULT_GEOCODER_TYPE, help="Geocoder service provide name")
+	# input_file_path = sys.argv[1]
+	# geocoder_type = None
+	# if len(sys.argv) == 3:
+	# 	geocoder_type = sys.argv[2]
 	main(input_file_path, geocoder_type=geocoder_type)
