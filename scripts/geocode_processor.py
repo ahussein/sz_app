@@ -135,16 +135,6 @@ class GeocoderFactory(object):
 			raise Error('Invalid GeoCoder type [%s]' % geocoder_type)
 		return getattr(geocoder, geocoder_type)
 
-class Location(object):
-	"""
-	Location class
-	"""
-	def __init__(self, latlng, bbox):
-		self.lat = latlng[0]
-		self.lng = latlng[1]
-		self.bbox = bbox
-
-
 
 report_template = \
 """
@@ -240,7 +230,9 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 						msg =  error_msg % (location_address, article_id, geocoder_result)
 						errors.append(msg)
 					else:
-						location = Location(geocoder_result.latlng, geocoder_result.bbox)
+						location = {'lat': geocoder_result.latlng[0], 
+									'lng': geocoder_result.latlng[1],
+									'bbox': geocoder_result.bbox}
 						result[article_id] = location
 						ADDRESS_CACHE[location_address] = location
 
