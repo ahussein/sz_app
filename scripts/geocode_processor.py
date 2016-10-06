@@ -197,7 +197,11 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 	# validate that the input file path exist
 	if not os.path.exists(input_file_path):
 		raise Error('Input file [%s] does not exist' % input_file_path)
-	load_address_cache()
+	try:
+		load_address_cache()
+	except Exception, ex:
+		print('Faield to load address cache. Error: %s' % ex)
+		
 	result = {}
 	errors = []
 	nr_of_records_with_no_address = 0
