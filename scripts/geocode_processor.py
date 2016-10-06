@@ -201,7 +201,7 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		load_address_cache()
 	except Exception, ex:
 		print('Faield to load address cache. Error: %s' % ex)
-		
+
 	result = {}
 	errors = []
 	nr_of_records_with_no_address = 0
@@ -212,12 +212,12 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		header = reader.next()
 		for index, row in enumerate(reader):
 			location_address = row[-2]
+			article_id = row[0]
 			# check if address already in the cache
 			if location_address in ADDRESS_CACHE:
 				result[article_id] = ADDRESS_CACHE[location_address]
 				continue
 
-			article_id = row[0]
 			if not location_address:
 				nr_of_records_with_no_address += 1
 				# print('Artical [%s] does not have location set' % article_id)
