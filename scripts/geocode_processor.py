@@ -26,6 +26,7 @@ import csv, codecs, cStringIO
 import os
 import sys
 import geocoder
+import json
 
 # handle unicode issues
 class UTF8Recoder:
@@ -134,6 +135,16 @@ class GeocoderFactory(object):
 			raise Error('Invalid GeoCoder type [%s]' % geocoder_type)
 		return getattr(geocoder, geocoder_type)
 
+class Location(object):
+	"""
+	Location class
+	"""
+	def __init__(self, latlng, bbox):
+		self.lat = latlng[0]
+		self.lng = latlng[1]
+		self.bbox = bbox
+
+
 
 report_template = \
 """
@@ -151,6 +162,37 @@ Errors:
 
 error_msg = 'Cannot get location for address [%s] associated with article [%s]. Error: [%s]'
 DEFAULT_GEOCODER_TYPE = 'google'
+ADDRESS_CACHE = {}
+DEFAULT_CACHE_FILE_PATH = 'geocoder_address_cache.json'
+
+def load_address_cache(cache_file_path=None):
+	"""
+	Loads address cache from the disk
+
+	@param cache_file_path: Path to the cache file on the system
+	@type cache_file_path: str
+	"""
+	global ADDRESS_CACHE
+	if cache_file_path is None:
+		cache_file_path = os.path.join(os.path.dirname(__file__), DEFAULT_CACHE_FILE_PATH)
+	if not os.path.exists(cache_file_path):
+		print('Cache file [%s] does not exist' % cache_file_path)
+	else:
+		ADDRESS_CACHE = json.load(open(cache_file_path, 'rb'))
+
+
+def save_addess_cache(cache_file_path=None):
+	"""
+	Saves the address cache to the disk
+
+	@param cache_file_path: Path to the cache file on the system
+	@type cache_file_path: str
+	"""
+	if cache_file_path is None:
+		cache_file_path = os.path.join(os.path.dirname(__file__), DEFAULT_CACHE_FILE_PATH)
+	
+	ADDRESS_CACHE = json.dump(ADDRESS_CACHE, open(cache_file_path, 'wb'))
+	
 
 def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 	"""
@@ -165,6 +207,7 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 	# validate that the input file path exist
 	if not os.path.exists(input_file_path):
 		raise Error('Input file [%s] does not exist' % input_file_path)
+	load_address_cache()
 	result = {}
 	errors = []
 	nr_of_records_with_no_address = 0
@@ -175,6 +218,11 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		header = reader.next()
 		for index, row in enumerate(reader):
 			location_address = row[-2]
+			# check if address already in the cache
+			if location_address in ADDRESS_CACHE:
+				result[article_id] = ADDRESS_CACHE[location_address]
+				continue
+
 			article_id = row[0]
 			if not location_address:
 				nr_of_records_with_no_address += 1
@@ -192,11 +240,18 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 						msg =  error_msg % (location_address, article_id, geocoder_result)
 						errors.append(msg)
 					else:
-						result[article_id] = {'lalng': geocoder_result.latlng,
-												'bbox': geocoder_result.bbox}
+						location = Location(geocoder_result.latlng, geocoder_result.bbox)
+						result[article_id] = location
+						ADDRESS_CACHE[location_address] = location
+
 				except Exception, ex:
 					msg =  error_msg % (location_address, article_id, ex)
 					errors.append(msg)
+	try:
+		save_addess_cache()
+	except Exception, ex:
+		print('Errors while saving address cache. Error: %s' % ex)
+
 	report = report_template % {'input_file_path': input_file_path,
 								'nr_location_records': nr_of_records_with_no_address,
 								'nr_failed_geocoding': len(errors),
