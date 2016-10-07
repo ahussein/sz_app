@@ -9,9 +9,10 @@ from flask_restful import Api, Resource
 
 
 app = Flask(__name__)
-app.config['MONGO_DBNAME'] = "test"
+app.config['MONGO_DBNAME'] = "sz"
 mongo = PyMongo(app, config_prefix="MONGO")
-APP_URL = "http:127.0.0.1:80"
+APP_URL = "http://127.0.0.1:80"
+
 
 class Article(Resource):
 	def get(self):
@@ -32,4 +33,4 @@ api.add_resource(Article, "/api", endpoint="articles")
 
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	app.run(debug=True, port=80)

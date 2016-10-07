@@ -20,6 +20,24 @@ Originaltext = original code of the XML delivered by editorial system
 
 The script will extract the Handlungsort field values and process them to clean any un-needed words and then send a query to a geocoder service to retrieve
 a pair of latitude and longitude. An example Handlungsort field value is: Lausitzring, Klettwitz, Deutschland
+
+articles = [
+{
+	'dialog_id': '',
+	'article_id': '',
+	'heading': '',
+	'pub_date':'',
+	'categories': '',
+	'text': '',
+	'address': {
+		'text': '',
+		'coord': ['', ''],
+		'bbox': {},
+	},
+	'online_url': '',
+	'image': '',
+},
+]
 """
 
 import csv, codecs, cStringIO
@@ -184,6 +202,55 @@ def save_addess_cache(cache_file_path=None):
 	
 	json.dump(ADDRESS_CACHE, open(cache_file_path, 'wb'))
 
+
+def create_article(row, location):
+	"""
+	Creates an article object from a csv row
+
+	@param row: A row from the csv file
+	@type row: list
+
+	@param location: Location information for the article entry
+	@type location: dict
+	"""
+	return {
+		'dialog_id': row[0],
+		'article_id': row[1],
+		'heading': row[2],
+		'pub_date': row[3],
+		'categories': '%s,%s' % (row[4], row[5]),
+		'text': row[9],
+		'address': {
+			'text': row[12],
+			'coord': [location['lat'], location['lng']],
+			'bbox': location['bbox'],
+		},
+		'online_url': '',
+		'image': '',
+
+	}
+
+def populate_db(articles):
+	"""
+	Updates the database with the collection of articles
+
+	@param articles: List of articles
+	@type articles: list
+	"""
+	from pymongo import MongoClient
+	client = MongoClient()
+	db = client.sz
+	articles_collection = db.articles
+	# delete existing records
+	records_to_check = []
+	for article in articles:
+		records_to_check.append({'dialog_id': article['dialog_id']})
+	res = articles_collection.delete_many({"$or": records_to_check})
+	print('Found [%s] existing articles in the DB...deleted!' % res.deleted_count)
+	res = articles_collection.insert_many(articles)
+	print('Added [%s] articles to DB' % len(res.inserted_ids))
+
+
 # @click.command()
 # @click.option('--input_file_path', help="Path to the input csv file")
 # @click.option('--geocoder_type', default=DEFAULT_GEOCODER_TYPE, help="Geocoder service provide name")
@@ -205,6 +272,7 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 	except Exception, ex:
 		print('Faield to load address cache. Error: %s' % ex)
 
+	articles = []
 	result = {}
 	errors = []
 	nr_of_records_with_no_address = 0
@@ -214,42 +282,49 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		reader = UnicodeReader(fd, delimiter=';')
 		header = reader.next()
 		for index, row in enumerate(reader):
+			article = 
 			location_address = row[-2]
 			article_id = row[0]
+			location = {}
 			# check if address already in the cache
 			if location_address in ADDRESS_CACHE:
-				result[article_id] = ADDRESS_CACHE[location_address]
-				continue
-
-			if not location_address:
-				nr_of_records_with_no_address += 1
-				# print('Artical [%s] does not have location set' % article_id)
+				location = ADDRESS_CACHE[location_address]
 			else:
-				try:
-					geocoder_result = geocoder_obj(location_address)
-					if geocoder_result.ok is False:
-						if geocoder_type != DEFAULT_GEOCODER_TYPE:
-							print("Failed to resolve address [%s] using geocoder [%s]. Trying default geocoder" % (location_address, geocoder_type))
-							if default_geocoder_obj is None:
-								default_geocoder_obj = GeocoderFactory().get(geocoder_type=DEFAULT_GEOCODER_TYPE)
-							geocoder_result = default_geocoder_obj(location_address)
-					if geocoder_result.ok is False:	
-						msg =  error_msg % (location_address, article_id, geocoder_result)
-						errors.append(msg)
-					else:
-						location = {'lat': geocoder_result.latlng[0], 
-									'lng': geocoder_result.latlng[1],
-									'bbox': geocoder_result.bbox}
-						result[article_id] = location
-						ADDRESS_CACHE[location_address] = location
+				if not location_address:
+					nr_of_records_with_no_address += 1
+					# print('Artical [%s] does not have location set' % article_id)
+				else:
+					try:
+						geocoder_result = geocoder_obj(location_address)
+						if geocoder_result.ok is False:
+							if geocoder_type != DEFAULT_GEOCODER_TYPE:
+								print("Failed to resolve address [%s] using geocoder [%s]. Trying default geocoder" % (location_address, geocoder_type))
+								if default_geocoder_obj is None:
+									default_geocoder_obj = GeocoderFactory().get(geocoder_type=DEFAULT_GEOCODER_TYPE)
+								geocoder_result = default_geocoder_obj(location_address)
+						if geocoder_result.ok is False:	
+							msg =  error_msg % (location_address, article_id, geocoder_result)
+							errors.append(msg)
+						else:
+							location = {'lat': geocoder_result.latlng[0], 
+										'lng': geocoder_result.latlng[1],
+										'bbox': geocoder_result.bbox}
+							ADDRESS_CACHE[location_address] = location
 
-				except Exception, ex:
-					msg =  error_msg % (location_address, article_id, ex)
-					errors.append(msg)
+					except Exception, ex:
+						msg =  error_msg % (location_address, article_id, ex)
+						errors.append(msg)
+			articles.append(create_article(row, location))
+			result[article_id] = location
 	try:
 		save_addess_cache()
 	except Exception, ex:
 		print('Errors while saving address cache. Error: %s' % ex)
+
+	try:
+		populate_db(articles)
+	except Exception, ex:
+		print('Errors while populating database. Error: %s' % ex)
 
 	report = report_template % {'input_file_path': input_file_path,
 								'nr_location_records': nr_of_records_with_no_address,
