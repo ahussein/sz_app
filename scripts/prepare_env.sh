@@ -21,4 +21,4 @@ ExecStart=/usr/bin/mongod --quiet --config /etc/mongod.conf
 WantedBy=multi-user.target
 EOF
 
-service mongod start
+/usr/bin/mongod --quiet --config /etc/mongod.conf&
