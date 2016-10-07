@@ -1,11 +1,12 @@
 #!/bin/bash
 
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
-echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.3 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-sudo apt-get update
-sudo apt-get install -y mongodb-org
+sudo su -
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.3 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+apt-get update
+apt-get install -y mongodb-org
 
-sudo cat > /lib/systemd/system/mongod.service <<EOF
+cat > /lib/systemd/system/mongod.service <<EOF
 [Unit]
 Description=High-performance, schema-free document-oriented database
 After=network.target
@@ -20,4 +21,4 @@ ExecStart=/usr/bin/mongod --quiet --config /etc/mongod.conf
 WantedBy=multi-user.target
 EOF
 
-sudo service mongod start
+service mongod start
