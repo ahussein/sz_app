@@ -222,8 +222,8 @@ def create_article(row, location):
 		'text': row[9],
 		'address': {
 			'text': row[12],
-			'coord': [location['lat'], location['lng']],
-			'bbox': location['bbox'],
+			'coord': [location['lat'], location['lng'] if location else [],
+			'bbox': location['bbox'] if location else {},
 		},
 		'online_url': '',
 		'image': '',
