@@ -282,7 +282,6 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		reader = UnicodeReader(fd, delimiter=';')
 		header = reader.next()
 		for index, row in enumerate(reader):
-			article = 
 			location_address = row[-2]
 			article_id = row[0]
 			location = {}
