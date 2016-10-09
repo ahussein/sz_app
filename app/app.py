@@ -16,6 +16,12 @@ mongo = PyMongo(app, config_prefix="MONGO")
 APP_URL = "http://127.0.0.1:80"
 
 
+def mongo_jsonfy(data):
+	"""
+	Jsonfy version that works with mongo bson data
+	"""
+	return json.loads(json_util.dumps(data))
+
 class Article(Resource):
 	def get(self):
 		data = []
@@ -23,7 +29,14 @@ class Article(Resource):
 		for article in cursor:
 			data.append(article)
 
-		return jsonify({'response': json.loads(json_util.dumps(data))})
+		return mongo_jsonify({'response': data})
+
+
+	def post(self):
+		data = request.get_json()
+		if not data:
+			data = {'response': "ERROR"}
+			return jsonify(data)
 
 
 
