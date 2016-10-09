@@ -270,7 +270,7 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 	try:
 		load_address_cache()
 	except Exception, ex:
-		print('Faield to load address cache. Error: %s' % ex)
+		print('Failed to load address cache. Error: %s' % ex)
 
 	articles = []
 	result = {}
@@ -282,14 +282,18 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		reader = UnicodeReader(fd, delimiter=';')
 		header = reader.next()
 		# workaround for the problem with unicode and the header
-		header_items = ['DialogId', 'ArtikelId', 'Überschrifttext',
+		header_items = ['DialogId', 'ArtikelId', u'Überschrifttext',
 						'Datum', 'Ressort', 'Unterressort',
 						'Artikeltext', 'Handlungsort']
-		for index, item in enumerate(list(header)):
-			for header_item in list(header_items):
-				if header_item in item:
-					header[index] = header_item
-					header_items.remove(header_item)
+		try:
+			for index, item in enumerate(list(header)):
+				for header_item in list(header_items):
+					if header_item in item:
+						header[index] = header_item
+						header_items.remove(header_item)
+						break
+		except Exception, ex:
+			import ipdb; ipdb.set_trace()
 
 		for index, row in enumerate(reader):
 			row_info = dict(zip(header, row))
