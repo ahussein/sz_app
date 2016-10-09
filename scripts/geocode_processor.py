@@ -216,7 +216,7 @@ def create_article(row_info, location):
 	return {
 		'dialog_id': row_info['DialogId'],
 		'article_id': row_info['ArtikelId'],
-		'heading': row_info['Überschrifttext'],
+		'heading': row_info[u'Überschrifttext'],
 		'pub_date': row_info['Datum'],
 		'categories': '%s,%s' % (row_info['Ressort'], row_info['Unterressort']),
 		'text': row_info['Artikeltext'],
@@ -285,15 +285,13 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		header_items = ['DialogId', 'ArtikelId', u'Überschrifttext',
 						'Datum', 'Ressort', 'Unterressort',
 						'Artikeltext', 'Handlungsort']
-		try:
-			for index, item in enumerate(list(header)):
-				for header_item in list(header_items):
-					if header_item in item:
-						header[index] = header_item
-						header_items.remove(header_item)
-						break
-		except Exception, ex:
-			import ipdb; ipdb.set_trace()
+						
+		for index, item in enumerate(list(header)):
+			for header_item in list(header_items):
+				if header_item in item:
+					header[index] = header_item
+					header_items.remove(header_item)
+					break
 
 		for index, row in enumerate(reader):
 			row_info = dict(zip(header, row))
