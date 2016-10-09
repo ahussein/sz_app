@@ -203,12 +203,12 @@ def save_addess_cache(cache_file_path=None):
 	json.dump(ADDRESS_CACHE, open(cache_file_path, 'wb'))
 
 
-def create_article(row, location):
+def create_article(row_info, location):
 	"""
 	Creates an article object from a csv row
 
-	@param row: A row from the csv file
-	@type row: dict
+	@param row_info: A row from the csv file
+	@type row_info: dict
 
 	@param location: Location information for the article entry
 	@type location: dict
