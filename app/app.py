@@ -17,6 +17,10 @@ APP_URL = "http://127.0.0.1:80"
 class Article(Resource):
 	def get(self):
 		data = []
+		cursor = mongo.db.articles.find().limit(10)
+		for article in cursor:
+			data.append(article)
+			
 		return jsonify({'response': data})
 
 
