@@ -208,20 +208,20 @@ def create_article(row, location):
 	Creates an article object from a csv row
 
 	@param row: A row from the csv file
-	@type row: list
+	@type row: dict
 
 	@param location: Location information for the article entry
 	@type location: dict
 	"""
 	return {
-		'dialog_id': row[0],
-		'article_id': row[1],
-		'heading': row[2],
-		'pub_date': row[3],
-		'categories': '%s,%s' % (row[4], row[5]),
-		'text': row[9],
+		'dialog_id': row_info['DialogId'],
+		'article_id': row_info['ArtikelId'],
+		'heading': row_info['Überschrifttext'],
+		'pub_date': row_info['Datum'],
+		'categories': '%s,%s' % (row_info['Ressort'], row_info['Unterressort']),
+		'text': row_info['Artikeltext'],
 		'address': {
-			'text': row[12],
+			'text': row_info['Handlungsort'],
 			'coord': [location['lat'], location['lng']] if location else [],
 			'bbox': location['bbox'] if location else {},
 		},
@@ -282,6 +282,7 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		reader = UnicodeReader(fd, delimiter=';')
 		header = reader.next()
 		for index, row in enumerate(reader):
+			row_info = dict(zip(header, row))
 			location_address = row[-2]
 			article_id = row[0]
 			location = {}
@@ -313,7 +314,7 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 					except Exception, ex:
 						msg =  error_msg % (location_address, article_id, ex)
 						errors.append(msg)
-			articles.append(create_article(row, location))
+			articles.append(create_article(row_info, location))
 			result[article_id] = location
 	try:
 		save_addess_cache()
