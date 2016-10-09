@@ -216,7 +216,7 @@ def create_article(row_info, location):
 	return {
 		'dialog_id': row_info['DialogId'],
 		'article_id': row_info['ArtikelId'],
-		'heading': row_info[u'Überschrifttext'],
+		'heading': row_info['Uberschrifttext'],
 		'pub_date': row_info['Datum'],
 		'categories': '%s,%s' % (row_info['Ressort'], row_info['Unterressort']),
 		'text': row_info['Artikeltext'],
@@ -285,7 +285,7 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		header_items = ['DialogId', 'ArtikelId', u'Überschrifttext',
 						'Datum', 'Ressort', 'Unterressort',
 						'Artikeltext', 'Handlungsort']
-						
+
 		for index, item in enumerate(list(header)):
 			for header_item in list(header_items):
 				if header_item in item:
