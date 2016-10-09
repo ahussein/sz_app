@@ -6,6 +6,8 @@ Flask app entry point
 from flask import Flask, jsonify, url_for, redirect, request
 from flask_pymongo import PyMongo
 from flask_restful import Api, Resource
+from bson import json_util
+import json
 
 
 app = Flask(__name__)
@@ -20,8 +22,8 @@ class Article(Resource):
 		cursor = mongo.db.articles.find().limit(10)
 		for article in cursor:
 			data.append(article)
-			
-		return jsonify({'response': data})
+
+		return jsonify({'response': json.loads(json_util.dumps(data))})
 
 
 
