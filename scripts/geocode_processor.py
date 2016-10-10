@@ -243,7 +243,7 @@ def populate_db(articles):
 	db = client.sz
 	articles_collection = db.articles
 	# create indexes if not exist
-	articles_collection.create_index([('address.geometry', pymongo.GEOSPHERE))])
+	articles_collection.create_index([('address.geometry', pymongo.GEOSPHERE)])
 
 	# delete existing records
 	records_to_check = []
