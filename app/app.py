@@ -35,11 +35,21 @@ class Article(Resource):
 	def post(self):
 		data = request.get_json()
 		if not data:
-			data = {'response': "ERROR"}
-			return mongo_jsonfy(data)
+			result = {'response': "ERROR"}
+			return mongo_jsonfy(result)
 
 		filters = data.get('filters', {})
 		location_filter = filters.get('location', {})
+		# for location filter we expect a source point [lat, lng] and a distance in meters
+		if 'source' not in location_filter or 'distance' not in location_filter:
+			result = {'response': "ERROR"}
+			return mongo_jsonfy(result)
+		query = {"address.coordinates": SON([("$near", location_filter['source']), ("$maxDistance", location_filter['distance'])])}
+		found_articles = []
+		for article in mongo.db.articles.find(query):
+			found_articles.append(article)
+		result = {'response': found_articles if found_articles else 'No articles found', 'count': len(found_articles)}
+		return mongo_jsonfy(result)
 
 
 class Index(Resource):
