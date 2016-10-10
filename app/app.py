@@ -23,6 +23,14 @@ def mongo_jsonfy(data):
 	"""
 	return json.loads(json_util.dumps(data))
 
+def _calculate_distance(loc1, loc2):
+	"""
+	Calculates the distance in meters between two points
+	"""
+	from geopy.distance import great_circle
+	distance = great_circle(loc1, loc2)
+	return distance.m
+
 class Article(Resource):
 	def get(self):
 		data = []
@@ -49,7 +57,14 @@ class Article(Resource):
 		query = {"address.coordinates": SON([("$near", location_filter['source']), ("$maxDistance", location_filter['distance'])])}
 		found_articles = []
 		for article in mongo.db.articles.find(query):
+			# clean the article reault
+			article.pop('text')
+			article['address'].pop('bbox')
+			article['address'].pop('geojson')
+
 			found_articles.append(article)
+			# get distance
+			article['distance'] = _calculate_distance(article['address']['coordinates'], location_filter['source'])
 		result = {'response': found_articles if found_articles else 'No articles found', 'count': len(found_articles)}
 		return mongo_jsonfy(result)
 
