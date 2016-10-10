@@ -8,6 +8,7 @@ from flask_pymongo import PyMongo
 from flask_restful import Api, Resource
 from bson import json_util
 import json
+from bson.son import SON
 
 
 app = Flask(__name__)
@@ -34,6 +35,7 @@ class Article(Resource):
 
 	def post(self):
 		data = request.get_json()
+		print(data)
 		if not data:
 			result = {'response': "ERROR"}
 			return mongo_jsonfy(result)
