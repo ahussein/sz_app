@@ -223,7 +223,7 @@ def create_article(row_info, location):
 		'address': {
 			'text': row_info['Handlungsort'],
 			"geojson": {"type": "Point", "coordinates": [location['lng'], location['lat']] if location else []},
-			'coordinates': [location['lng'], location['lat']] if location else [],
+			'coordinates': [location['lat'], location['lng']] if location else [],
 			'bbox': location['bbox'] if location else {},
 		},
 		'online_url': '',
