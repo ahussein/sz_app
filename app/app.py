@@ -29,15 +29,17 @@ class Article(Resource):
 		for article in cursor:
 			data.append(article)
 
-		return mongo_jsonify({'response': data})
+		return mongo_jsonfy({'response': data})
 
 
 	def post(self):
 		data = request.get_json()
 		if not data:
 			data = {'response': "ERROR"}
-			return jsonify(data)
+			return mongo_jsonfy(data)
 
+		filters = data.get('filters', {})
+		location_filter = filters.get('location', {})
 
 
 class Index(Resource):
