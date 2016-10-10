@@ -216,7 +216,7 @@ def create_article(row_info, location):
 	return {
 		'dialog_id': row_info['DialogId'],
 		'article_id': row_info['ArtikelId'],
-		'heading': row_info['Uberschrifttext'],
+		'heading': row_info['Ueberschrifttext'],
 		'pub_date': row_info['Datum'],
 		'categories': '%s,%s' % (row_info['Ressort'], row_info['Unterressort']),
 		'text': row_info['Artikeltext'],
@@ -286,7 +286,7 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		reader = UnicodeReader(fd, delimiter=';')
 		header = reader.next()
 		# workaround for the problem with unicode and the header
-		header_items = ['DialogId', 'ArtikelId', u'Überschrifttext',
+		header_items = ['DialogId', 'ArtikelId', 'Ueberschrifttext',
 						'Datum', 'Ressort', 'Unterressort',
 						'Artikeltext', 'Handlungsort']
 
