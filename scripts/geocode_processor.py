@@ -222,7 +222,7 @@ def create_article(row_info, location):
 		'text': row_info['Artikeltext'],
 		'address': {
 			'text': row_info['Handlungsort'],
-			'coord': [location['lat'], location['lng']] if location else [],
+			"geometry": {"type": "Point", "coordinates": [location['lng'], location['lat']] if location else []},
 			'bbox': location['bbox'] if location else {},
 		},
 		'online_url': '',
@@ -238,9 +238,13 @@ def populate_db(articles):
 	@type articles: list
 	"""
 	from pymongo import MongoClient
+	import pymongo
 	client = MongoClient()
 	db = client.sz
 	articles_collection = db.articles
+	# create indexes if not exist
+	articles_collection.create_index([('address.geometry', pymongo.GEOSPHERE))])
+
 	# delete existing records
 	records_to_check = []
 	for article in articles:
