@@ -54,7 +54,7 @@ class Article(Resource):
 		if 'source' not in location_filter or 'distance' not in location_filter:
 			result = {'response': "ERROR"}
 			return mongo_jsonfy(result)
-		query = {"address.coordinates": SON([("$near", location_filter['source']), ("$maxDistance", location_filter['distance'])])}
+		query = {"address.coordinates": SON([("$near", location_filter['source']), ("$maxDistance", location_filter['distance']/ 6378.1)])}
 		found_articles = []
 		for article in mongo.db.articles.find(query):
 			# clean the article reault
