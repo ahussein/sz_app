@@ -228,6 +228,7 @@ def create_article(row_info, location):
 		},
 		'online_url': '',
 		'image': '',
+		'read_times': 0,
 
 	}
 
