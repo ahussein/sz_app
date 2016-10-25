@@ -227,7 +227,7 @@ hr.small {
     /*top:0; 
     bottom:0; */
     width:100%;
-    height: 700px; 
+    height: 600px; 
 }
 
 @media(max-width: 768px){
@@ -236,7 +236,7 @@ hr.small {
     }
 }
 .map {
-    height: 700px;
+    height: 600px;
 }
 
 @media(max-width:768px) {
