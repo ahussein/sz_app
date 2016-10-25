@@ -155,12 +155,15 @@
 
     // Add zoom and rotation controls to the map.
     map.addControl(new mapboxgl.NavigationControl());
+
     // current location control
-    map.addControl(new mapboxgl.GeolocateControl());
+    var geolocation_control = new mapboxgl.GeolocateControl();
+    map.addControl(geolocation_control);
 
     // on load handler
     map.on('load', function(){
-        getLocation()
+        getLocation();
+        map.scrollZoom.disable();
     });
 
     // get the current user location 
@@ -170,11 +173,45 @@
         }
     }
     function showPosition(position) {
-        map.setCenter([position.coords.longitude, position.coords.latitude])
-        // map.setCenter([-90.303066, -0.562463])
-        map.setZoom(5)
-        // x.innerHTML = "Latitude: " + position.coords.latitude + 
-        // "<br>Longitude: " + position.coords.longitude; 
+
+        map.flyTo({
+            center: [position.coords.longitude, position.coords.latitude],
+            zoom: 12,
+            bearing: 0,
+            pitch: 0,
+
+            // These options control the flight curve, making it move
+            // slowly and zoom out almost completely before starting
+            // to pan.
+            speed: 0.5, // make the flying slow
+            curve: 1, // change the speed at which it zooms out
+
+            // This can be any easing function: it takes a number between
+            // 0 and 1 and returns another number between 0 and 1.
+            easing: function (t) {
+                return t;
+            }
+        });
+
+        var marker = new mapboxgl.Marker()
+                          .setLngLat([position.coords.longitude, position.coords.latitude])
+                          .addTo(map);
+
+        // create a DOM element for the marker
+        // var el = document.createElement('div');
+        // el.className = 'marker';
+        // el.style.backgroundImage = 'url(./img/location_marker.png)';
+        // el.style.width = '40px';
+        // el.style.height = '40px';
+
+        // el.addEventListener('click', function() {
+        //     window.alert("You are here!");
+        // });
+
+        // // add marker to map
+        // new mapboxgl.Marker(el, {offset: [-40 / 2, -40 / 2]})
+        //     .setLngLat([position.coords.longitude, position.coords.latitude])
+        //     .addTo(map);
     }
 
 
