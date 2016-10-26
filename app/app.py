@@ -14,7 +14,13 @@ from bson.son import SON
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = "sz"
 mongo = PyMongo(app, config_prefix="MONGO")
-APP_URL = "http://127.0.0.1:80"
+
+
+def cors_middleware(request, response, params):
+	"""
+	Sets the Access-Control-Allow-Origin: * header
+	"""
+	response.set_header('Access-Control-Allow-Origin', '*')
 
 
 def mongo_jsonfy(data):
@@ -76,6 +82,8 @@ class Index(Resource):
 
 
 api = Api(app)
+api.wsgi_app = cors_middleware
+
 api.add_resource(Index, "/", endpoint="index")
 api.add_resource(Article, "/api", endpoint="articles")
 

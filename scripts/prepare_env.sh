@@ -23,7 +23,19 @@ ExecStart=/usr/bin/mongod --quiet --config /etc/mongod.conf
 WantedBy=multi-user.target
 EOF
 
+# start mongo
 /usr/bin/mongod --quiet --config /etc/mongod.conf&
+
+# install nginx
+apt-get update
+apt-get install -y nginx
+
+# copy the config/sz_ngnix to /etc/nginx/sites-available/sz and then link it to the enabled sites
+cp ../config/sz_ngnix /etc/nginx/sites-available/sz
+cp ../config/sz_api_ngnix /etc/nginx/sites-available/sz_api
+ln -s /etc/nginx/sites-available/sz /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/sz_api /etc/nginx/sites-enabled/
+
 
 # install pip and virtualenv
 apt-get install -y python-pip
@@ -32,3 +44,10 @@ pip install virtualenv
 
 cd /opt/sz_app/app
 env/bin/pip install -r requirements.txt
+
+
+# start backend service
+start backend_sz_app
+
+# restart nginx
+service nginx resstart

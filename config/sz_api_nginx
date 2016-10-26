@@ -1,0 +1,11 @@
+server {
+    listen 8090;
+    server_name sz.de;
+    charset UTF-8;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/opt/sz_app/sz.sock;
+    }
+
+}
