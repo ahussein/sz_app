@@ -184,7 +184,7 @@
             // slowly and zoom out almost completely before starting
             // to pan.
             speed: 0.5, // make the flying slow
-            curve: 1, // change the speed at which it zooms out
+            curve: 1.42, // change the speed at which it zooms out
 
             // This can be any easing function: it takes a number between
             // 0 and 1 and returns another number between 0 and 1.
@@ -193,25 +193,39 @@
             }
         });
 
-        var marker = new mapboxgl.Marker()
-                          .setLngLat([position.coords.longitude, position.coords.latitude])
-                          .addTo(map);
+    
+        map.on('moveend', function(eventData){
 
-        // create a DOM element for the marker
-        // var el = document.createElement('div');
-        // el.className = 'marker';
-        // el.style.backgroundImage = 'url(./img/location_marker.png)';
-        // el.style.width = '40px';
-        // el.style.height = '40px';
+            // create a DOM element for the marker
+            var el = document.createElement('div');
+            el.className = 'marker';
+            el.style.backgroundImage = 'url(./img/location_marker.png)';
+            el.style.width = '40px';
+            el.style.height = '40px';
 
-        // el.addEventListener('click', function() {
-        //     window.alert("You are here!");
-        // });
+            el.addEventListener('click', function() {
+                window.alert("You are here!");
+            });
 
-        // // add marker to map
-        // new mapboxgl.Marker(el, {offset: [-40 / 2, -40 / 2]})
-        //     .setLngLat([position.coords.longitude, position.coords.latitude])
-        //     .addTo(map);
+            // add marker to map
+            new mapboxgl.Marker(el, {offset: [-40 / 2, -40 / 2]})
+                .setLngLat([position.coords.longitude, position.coords.latitude])
+                .addTo(map);
+        });
+
+        // call the basic disatnce filter
+        jQuery.ajax( {
+            url: 'http://185.69.164.90:8080',
+            type: 'POST',
+            data: { "filters": {"location": {"source": [52.557907, 13.299039], "distance": 500}} },
+            beforeSend : function( xhr ) {
+                console.log(xhr);
+            },
+            success: function( response ) {
+                // reponse
+                console.log(response)
+            }
+        } );
     }
 
 
