@@ -80,10 +80,8 @@ class Index(Resource):
 		return redirect(url_for("articles"))
 
 
-
+app.wsgi_app = cors_middleware
 api = Api(app)
-api.wsgi_app = cors_middleware
-
 api.add_resource(Index, "/", endpoint="index")
 api.add_resource(Article, "/api", endpoint="articles")
 
