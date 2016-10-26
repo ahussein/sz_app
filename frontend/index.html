@@ -156,7 +156,27 @@
     // Add zoom and rotation controls to the map.
     map.addControl(new mapboxgl.NavigationControl());
     // current location control
-    map.addControl(new mapboxgl.GeolocateControl()); 
+    map.addControl(new mapboxgl.GeolocateControl());
+
+    // on load handler
+    map.on('load', function(){
+        getLocation()
+    });
+
+    // get the current user location 
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        }
+    }
+    function showPosition(position) {
+        map.setCenter([position.coords.longitude, position.coords.latitude])
+        // map.setCenter([-90.303066, -0.562463])
+        map.setZoom(5)
+        // x.innerHTML = "Latitude: " + position.coords.latitude + 
+        // "<br>Longitude: " + position.coords.longitude; 
+    }
+
 
     // Closes the sidebar menu
     $("#menu-close").click(function(e) {
@@ -208,26 +228,27 @@
             }
         }
     });
+
     // Disable Google Maps scrolling
     // See http://stackoverflow.com/a/25904582/1607849
     // Disable scroll zooming and bind back the click event
-    var onMapMouseleaveHandler = function(event) {
-        var that = $(this);
-        that.on('click', onMapClickHandler);
-        that.off('mouseleave', onMapMouseleaveHandler);
-        that.find('iframe').css("pointer-events", "none");
-    }
-    var onMapClickHandler = function(event) {
-            var that = $(this);
-            // Disable the click handler until the user leaves the map area
-            that.off('click', onMapClickHandler);
-            // Enable scrolling zoom
-            that.find('iframe').css("pointer-events", "auto");
-            // Handle the mouse leave event
-            that.on('mouseleave', onMapMouseleaveHandler);
-        }
-        // Enable map zooming with mouse scroll when the user clicks the map
-    $('.map').on('click', onMapClickHandler);
+    // var onMapMouseleaveHandler = function(event) {
+    //     var that = $(this);
+    //     that.on('click', onMapClickHandler);
+    //     that.off('mouseleave', onMapMouseleaveHandler);
+    //     that.find('iframe').css("pointer-events", "none");
+    // }
+    // var onMapClickHandler = function(event) {
+    //         var that = $(this);
+    //         // Disable the click handler until the user leaves the map area
+    //         that.off('click', onMapClickHandler);
+    //         // Enable scrolling zoom
+    //         that.find('iframe').css("pointer-events", "auto");
+    //         // Handle the mouse leave event
+    //         that.on('mouseleave', onMapMouseleaveHandler);
+    //     }
+    //     // Enable map zooming with mouse scroll when the user clicks the map
+    // $('.map').on('click', onMapClickHandler);
     </script>
 
 </body>
