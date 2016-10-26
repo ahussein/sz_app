@@ -222,20 +222,23 @@ hr.small {
 }
 
 /* Map */
+
 #map { 
-    position:absolute; 
-    /*top:0; 
-    bottom:0; */
     width:100%;
-    height: 600px; 
+    height: 100%; 
+}
+
+.content{
+    height: 600px;
 }
 
 @media(max-width: 768px){
-    #map{
+    .content{
         height: 75%;
     }
 }
-.map {
+
+/*.map {
     height: 600px;
 }
 
@@ -248,7 +251,7 @@ hr.small {
 .map iframe {
     pointer-events: none;
 }
-
+*/
 /* Footer */
 
 footer {
