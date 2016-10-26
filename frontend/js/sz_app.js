@@ -29,6 +29,26 @@ function getLocation() {
         navigator.geolocation.getCurrentPosition(showPosition);
     }
 }
+function create_marker(marker_type, map_obj, marker_data){
+    // create a DOM element for the marker
+    var el = document.createElement('div');
+    el.className = 'marker';
+    el.id = 'marker_current_location'
+    el.style.backgroundImage = 'url(./img/location_marker.png)';
+    if (marker_type == 'article'){
+        el.className += ' marker_article'
+        el.id = marker_data.id
+        el.style.backgroundImage = 'url(./img/article_marker.png)';
+    }
+    el.style.width = marker_data.size[0] +'px';
+    el.style.height = marker_data.size[1] + 'px';
+
+    // add marker to map
+    marker = new mapboxgl.Marker(el, {offset: [-marker_data.size[0] / 2, -marker_data.size[1] / 2]})
+        .setLngLat([marker_data.position.longitude, marker_data.position.latitude])
+        .addTo(map_obj);    
+
+}
 function showPosition(position) {
 
     map.flyTo({
@@ -52,22 +72,26 @@ function showPosition(position) {
 
 
     map.on('moveend', function(eventData){
-
+        marker_data = {
+                        size:[24, 24],
+                        position: {
+                            longitude: position.coords.longitude,
+                            latitude: position.coords.latitude
+                        },
+                       }
+        create_marker('location', map, marker_data)
         // create a DOM element for the marker
-        var el = document.createElement('div');
-        el.className = 'marker';
-        el.style.backgroundImage = 'url(./img/location_marker.png)';
-        el.style.width = '40px';
-        el.style.height = '40px';
+        // var el = document.createElement('div');
+        // el.className = 'marker';
+        // el.id = 'marker_current_location'
+        // el.style.backgroundImage = 'url(./img/location_marker.png)';
+        // el.style.width = '40px';
+        // el.style.height = '40px';
 
-        el.addEventListener('click', function() {
-            window.alert("You are here!");
-        });
-
-        // add marker to map
-        new mapboxgl.Marker(el, {offset: [-40 / 2, -40 / 2]})
-            .setLngLat([position.coords.longitude, position.coords.latitude])
-            .addTo(map);
+        // // add marker to map
+        // new mapboxgl.Marker(el, {offset: [-40 / 2, -40 / 2]})
+        //     .setLngLat([position.coords.longitude, position.coords.latitude])
+        //     .addTo(map);
     });
 
     // call the basic disatnce filter
@@ -80,6 +104,18 @@ function showPosition(position) {
         success: function( response ) {
             // reponse
             console.log(response)
+            for (var item in response.response){
+                item = response.response[item]
+                marker_data = {
+                    size: [24, 24],
+                    position: {
+                        longitude: item.address.coordinates[1],
+                        latitude: item.address.coordinates[0]
+                    },
+                    id: item.dialog_id
+                }
+                create_marker('article', map, marker_data);
+            }
         },
         error: function (data){
             // error
