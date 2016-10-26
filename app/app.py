@@ -9,18 +9,13 @@ from flask_restful import Api, Resource
 from bson import json_util
 import json
 from bson.son import SON
-
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = "sz"
+CORS(app)
 mongo = PyMongo(app, config_prefix="MONGO")
 
-
-def cors_middleware(request, response, params):
-	"""
-	Sets the Access-Control-Allow-Origin: * header
-	"""
-	response.set_header('Access-Control-Allow-Origin', '*')
 
 
 def mongo_jsonfy(data):
@@ -80,7 +75,6 @@ class Index(Resource):
 		return redirect(url_for("articles"))
 
 
-app.wsgi_app = cors_middleware
 api = Api(app)
 api.add_resource(Index, "/", endpoint="index")
 api.add_resource(Article, "/api", endpoint="articles")
