@@ -259,7 +259,7 @@ def populate_db(articles):
 		res = articles_collection.insert_many(articles)
 		print('Added [%s] articles to DB' % len(res.inserted_ids))
 	except BulkWriteError as bwe:
-		pritn(bwe.details)
+		print(bwe.details)
 
 
 # @click.command()
