@@ -213,7 +213,7 @@ def create_article(row_info, location):
 	@param location: Location information for the article entry
 	@type location: dict
 	"""
-	return {
+	article = {
 		'dialog_id': row_info['DialogId'],
 		'article_id': row_info['ArtikelId'],
 		'heading': row_info['Ueberschrifttext'],
@@ -222,7 +222,7 @@ def create_article(row_info, location):
 		'text': row_info['Artikeltext'],
 		'address': {
 			'text': row_info['Handlungsort'],
-			"geometry": {"type": "Point", "coordinates": [location['lng'], location['lat']] if location else []},
+			# "geometry": {"type": "Point", "coordinates": [location['lng'], location['lat']] if location else []},
 			'coordinates': [location['lng'], location['lat']] if location else [],
 			'bbox': location['bbox'] if location else {},
 		},
@@ -231,6 +231,9 @@ def create_article(row_info, location):
 		'read_times': 0,
 
 	}
+	if location:
+		article['address']['geometry'] = {"type": "Point", "coordinates": [location['lng'], location['lat']]}
+	return article
 
 def populate_db(articles):
 	"""
