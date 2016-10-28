@@ -62,7 +62,8 @@ class Article(Resource):
 			# clean the article reault
 			article.pop('text')
 			article['address'].pop('bbox')
-			article['address'].pop('geojson')
+			if 'geometry' in article['address']:
+				article['address'].pop('geometry')
 
 			found_articles.append(article)
 			# get distance
