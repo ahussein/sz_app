@@ -241,6 +241,7 @@ def populate_db(articles):
 	"""
 	from pymongo import MongoClient
 	import pymongo
+	from pymongo.errors import BulkWriteError
 	client = MongoClient()
 	db = client.sz
 	articles_collection = db.articles
@@ -254,8 +255,11 @@ def populate_db(articles):
 		records_to_check.append({'dialog_id': article['dialog_id']})
 	res = articles_collection.delete_many({"$or": records_to_check})
 	print('Found [%s] existing articles in the DB...deleted!' % res.deleted_count)
-	res = articles_collection.insert_many(articles)
-	print('Added [%s] articles to DB' % len(res.inserted_ids))
+	try:
+		res = articles_collection.insert_many(articles)
+		print('Added [%s] articles to DB' % len(res.inserted_ids))
+	except BulkWriteError as bwe:
+		pritn(bwe.details)
 
 
 # @click.command()
