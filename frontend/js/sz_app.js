@@ -1,3 +1,56 @@
+ // Closes the sidebar menu
+$("#menu-close").click(function(e) {
+    e.preventDefault();
+    $("#sidebar-wrapper").toggleClass("active");
+});
+// Opens the sidebar menu
+$("#menu-toggle").click(function(e) {
+    e.preventDefault();
+    $("#sidebar-wrapper").toggleClass("active");
+});
+// Scrolls to the selected menu item on the page
+$(function() {
+    $('a[href*=#]:not([href=#],[data-toggle],[data-target],[data-slide])').click(function() {
+        if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') || location.hostname == this.hostname) {
+            var target = $(this.hash);
+            target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+            if (target.length) {
+                $('html,body').animate({
+                    scrollTop: target.offset().top
+                }, 1000);
+                return false;
+            }
+        }
+    });
+});
+//#to-top button appears after scrolling
+var fixed = false;
+$(document).scroll(function() {
+    if ($(this).scrollTop() > 250) {
+        if (!fixed) {
+            fixed = true;
+            // $('#to-top').css({position:'fixed', display:'block'});
+            $('#to-top').show("slow", function() {
+                $('#to-top').css({
+                    position: 'fixed',
+                    display: 'block'
+                });
+            });
+        }
+    } else {
+        if (fixed) {
+            fixed = false;
+            $('#to-top').hide("slow", function() {
+                $('#to-top').css({
+                    display: 'none'
+                });
+            });
+        }
+    }
+});
+
+// result markers
+var news_markers = new Map();
 // mapbox 
 // L.mapbox.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
 // var map = L.mapbox.map('map', 'mapbox.streets')
@@ -23,6 +76,43 @@ map.on('load', function(){
     map.scrollZoom.disable();
 });
 
+// on zoom handler
+var zoom_threshold = 13;
+var building_3d_layer = false;
+var building_3d_layer_id = '3d-buildings';
+map.on('zoom', function(){
+    if (map.getZoom() >= zoom_threshold){
+        if (building_3d_layer == false){
+            map.addLayer({
+                'id': building_3d_layer_id,
+                'source': 'composite',
+                'source-layer': 'building',
+                'filter': ['==', 'extrude', 'true'],
+                'type': 'fill',
+                'minzoom': 15,
+                'paint': {
+                    'fill-color': '#aaa',
+                    'fill-extrude-height': {
+                        'type': 'identity',
+                        'property': 'height'
+                    },
+                    'fill-extrude-base': {
+                        'type': 'identity',
+                        'property': 'min_height'
+                    },
+                    'fill-opacity': .6
+                }
+            });
+            building_3d_layer = true;
+        }
+        map.setLayoutProperty(building_3d_layer_id, 'visibility', 'visible');
+    }else{
+        if (building_3d_layer == true){
+            map.setLayoutProperty(building_3d_layer_id, 'visibility', 'none');
+        }
+    }
+});
+
 // get the current user location 
 function getLocation() {
     if (navigator.geolocation) {
@@ -44,15 +134,16 @@ function create_marker(marker_type, map_obj, marker_data){
     el.style.height = marker_data.size[1] + 'px';
 
     // add marker to map
-    marker = new mapboxgl.Marker(el, {offset: [-marker_data.size[0] / 2, -marker_data.size[1] / 2]})
+    return new mapboxgl.Marker(el, {offset: [-marker_data.size[0] / 2, -marker_data.size[1] / 2]})
         .setLngLat([marker_data.position.longitude, marker_data.position.latitude])
-        .addTo(map_obj);    
-
+        .addTo(map_obj); 
 }
 function showPosition(position) {
 
     map.flyTo({
         center: [position.coords.longitude, position.coords.latitude],
+        // test with berlin as a center point
+        // center: [13.409660, 52.513728],
         zoom: 12,
         bearing: 0,
         pitch: 0,
@@ -77,6 +168,9 @@ function showPosition(position) {
                         position: {
                             longitude: position.coords.longitude,
                             latitude: position.coords.latitude
+                            // test with berlin as a center point
+                            // longitude: 13.409660,
+                            // latitude: 52.513728
                         },
                        }
         create_marker('location', map, marker_data)
@@ -94,27 +188,31 @@ function showPosition(position) {
         //     .addTo(map);
     });
 
+
     // call the basic disatnce filter
     jQuery.ajax( {
         url: 'http://185.69.164.90:8090/api',
         type: 'post',
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify({ filters: {location: {source: [position.coords.latitude, position.coords.longitude], distance: 500}} }),
+        // test with berlin as a center point
+        // data: JSON.stringify({ filters: {location: {source: [52.513728, 13.409660], distance: 500}} }),
         // traditional: true,
         success: function( response ) {
             // reponse
             console.log(response)
             for (var item in response.response){
                 item = response.response[item]
+                item.marker_size = [24, 24]
                 marker_data = {
-                    size: [24, 24],
+                    size: item.marker_size,
                     position: {
                         longitude: item.address.coordinates[1],
                         latitude: item.address.coordinates[0]
                     },
                     id: item.dialog_id
                 }
-                create_marker('article', map, marker_data);
+                news_markers.set(item.dialog_id, create_marker('article', map, marker_data));
             }
         },
         error: function (data){
