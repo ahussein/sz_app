@@ -194,21 +194,24 @@ function showPosition(position) {
         url: 'http://185.69.164.90:8090/api',
         type: 'post',
         contentType: "application/json; charset=utf-8",
-        data: JSON.stringify({ filters: {location: {source: [position.coords.latitude, position.coords.longitude], distance: 500}} }),
+        data: JSON.stringify({ filters: {location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}} }),
         // test with berlin as a center point
         // data: JSON.stringify({ filters: {location: {source: [52.513728, 13.409660], distance: 500}} }),
         // traditional: true,
         success: function( response ) {
             // reponse
             console.log(response)
+            if (response.count == 0){
+                return
+            }
             for (var item in response.response){
                 item = response.response[item]
                 item.marker_size = [24, 24]
                 marker_data = {
                     size: item.marker_size,
                     position: {
-                        longitude: item.address.coordinates[1],
-                        latitude: item.address.coordinates[0]
+                        longitude: item.address.coordinates[0],
+                        latitude: item.address.coordinates[1]
                     },
                     id: item.dialog_id
                 }
