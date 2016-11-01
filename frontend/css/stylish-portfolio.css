@@ -235,6 +235,10 @@ hr.small {
     padding-bottom: 0px;
 }
 
+#news_panel{
+    height: 600px;
+}
+
 .clickable
 {
     cursor: pointer;
@@ -246,6 +250,9 @@ hr.small {
 
 @media(max-width: 768px){
     .content{
+        height: 75%;
+    }
+    #news_panel{
         height: 75%;
     }
 }
