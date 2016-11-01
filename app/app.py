@@ -60,10 +60,10 @@ class Article(Resource):
 		found_articles = []
 		for article in mongo.db.articles.find(query):
 			# clean the article reault
-			article.pop('text')
+			# article.pop('text')
 			article['address'].pop('bbox')
-			if 'geometry' in article['address']:
-				article['address'].pop('geometry')
+			# if 'geometry' in article['address']:
+			# 	article['address'].pop('geometry')
 
 			found_articles.append(article)
 			# get distance
