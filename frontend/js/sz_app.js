@@ -217,7 +217,7 @@ map.on('click', function (e) {
     // based on the feature found.
     var popup = new mapboxgl.Popup()
         .setLngLat(feature.geometry.coordinates)
-        .setHTML(feature.properties.text)
+        .setHTML(feature.properties.text.slice(0, 200) + "...")
         .addTo(map);
 });
 

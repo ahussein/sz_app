@@ -327,3 +327,10 @@ footer {
     max-width: 400px;
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
+
+@media(max-width: 768px){
+    .mapboxgl-popup {
+        max-width: 200px;
+        font: 10px/15px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    }
+}
