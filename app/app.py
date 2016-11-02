@@ -52,13 +52,13 @@ class Article(Resource):
 		filters = data.get('filters', {})
 		location_filter = filters.get('location', {})
 		text_filter = filters.get('text', "")
-		# for location filter we expect a source point [lat, lng] and a distance in meters
-		if 'source' not in location_filter or 'distance' not in location_filter:
-			result = {'response': "ERROR"}
-			return mongo_jsonfy(result)
 		query_kwargs = {}
 		query = []
 		if location_filter:
+			# for location filter we expect a source point [lat, lng] and a distance in meters
+			if 'source' not in location_filter or 'distance' not in location_filter:
+				result = {'response': "ERROR"}
+				return mongo_jsonfy(result)
 			query.append({"address.geometry": { "$nearSphere": { "$geometry": { "type": "Point", "coordinates": location_filter['source'] }, 
 						"$maxDistance": location_filter['distance'] } } })
 		# query = {"address.coordinates": SON([("$near", location_filter['source']), ("$maxDistance", location_filter['distance']/ 6378.1)])}
