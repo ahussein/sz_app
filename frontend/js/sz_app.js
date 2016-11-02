@@ -52,6 +52,7 @@ $(document).scroll(function() {
 // result markers
 var news_markers = new Map();
 var current_result = {};
+var articles_source_id = "articles";
 // mapbox 
 // L.mapbox.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
 // var map = L.mapbox.map('map', 'mapbox.streets')
@@ -193,41 +194,6 @@ function showPosition(position) {
     default_filter = { filters: {location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}} }
     query_server(default_filter, null, null)
 
-    // call the basic disatnce filter
-    // jQuery.ajax( {
-    //     url: 'http://185.69.164.90:8090/api',
-    //     type: 'post',
-    //     contentType: "application/json; charset=utf-8",
-    //     data: JSON.stringify({ filters: {location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}} }),
-    //     // test with berlin as a center point
-    //     // data: JSON.stringify({ filters: {location: {source: [52.513728, 13.409660], distance: 500}} }),
-    //     // traditional: true,
-    //     success: function( response ) {
-    //         // reponse
-    //         console.log(response)
-    //         if (response.count == 0){
-    //             return
-    //         }
-    //         for (var item in response.response){
-    //             item = response.response[item]
-    //             item.marker_size = [24, 24]
-    //             marker_data = {
-    //                 size: item.marker_size,
-    //                 position: {
-    //                     longitude: item.address.coordinates[0],
-    //                     latitude: item.address.coordinates[1]
-    //                 },
-    //                 id: item.dialog_id
-    //             }
-    //             news_markers.set(item.dialog_id, create_marker('article', map, marker_data));
-    //         }
-    //     },
-    //     error: function (data){
-    //         // error
-    //         console.log(data)
-    //     }
-    // } );
-
 }
 
 // Create a popup, but don't add it to the map yet.
@@ -236,14 +202,12 @@ var popup = new mapboxgl.Popup({
     closeOnClick: false
 });
 
-map.on('mousemove', function(e) {
-
-    var features = map.queryRenderedFeatures(e.point, { layers: ['articles'] });
-    // Change the cursor style as a UI indicator.
-    map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+// When a click event occurs near a place, open a popup at the location of
+// the feature, with description HTML from its properties.
+map.on('click', function (e) {
+    var features = map.queryRenderedFeatures(e.point, { layers: [articles_source_id] });
 
     if (!features.length) {
-        popup.remove();
         return;
     }
 
@@ -251,29 +215,29 @@ map.on('mousemove', function(e) {
 
     // Populate the popup and set its coordinates
     // based on the feature found.
-    popup.setLngLat(feature.geometry.coordinates)
-        .setHTML(feature.properties.description)
+    var popup = new mapboxgl.Popup()
+        .setLngLat(feature.geometry.coordinates)
+        .setHTML(feature.properties.text)
         .addTo(map);
+});
+
+// Use the same approach as above to indicate that the symbols are clickable
+// by changing the cursor style to 'pointer'.
+map.on('mousemove', function (e) {
+    var features = map.queryRenderedFeatures(e.point, { layers: [articles_source_id] });
+    map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
 });
 
 
 // create mapbox sources from the news article data
 function create_source(data){
-    var features = new Array();
-    var source_id = "articles"
-    for (var index=0; index < data.count; index++){
-        item = data.response[index];
-        item.type = "Feature";
-        features.push(item);
-    }
-    map.addSource(source_id, {
+    map.addSource(articles_source_id, {
         "type": "geojson",
         "data": {
             "type": "FeatureCollection",
-            "features": features
+            "features": data.response
         }
     });
-    return source_id;
 }
 
 // function to update the map with the latest filte rresults
@@ -283,13 +247,12 @@ function update_map(data){
         return
     }
     // create/update mapbox source
-    source_id = create_source(data)
-    if 
+    create_source(data);
     // add layer
     map.addLayer({
-        "id": source_id,
+        "id": articles_source_id,
         "type": "symbol",
-        "source": source_id,
+        "source": articles_source_id,
         "layout": {
             "icon-image": "castle-15",
             "icon-allow-overlap": true
@@ -324,19 +287,6 @@ function query_server(filters, on_success, on_error){
             if (on_success){
                 on_success(response)
             }
-            // for (var item in response.response){
-            //     item = response.response[item]
-            //     item.marker_size = [24, 24]
-            //     marker_data = {
-            //         size: item.marker_size,
-            //         position: {
-            //             longitude: item.address.coordinates[0],
-            //             latitude: item.address.coordinates[1]
-            //         },
-            //         id: item.dialog_id
-            //     }
-            //     news_markers.set(item.dialog_id, create_marker('article', map, marker_data));
-            // }
         },
         error: function (data){
             // error
@@ -352,18 +302,18 @@ function query_server(filters, on_success, on_error){
 
 // handle the click of the collapsing panel
 jQuery(function ($) {
-        $('.panel-heading span.clickable').on("click", function (e) {
-            if ($(this).hasClass('panel-collapsed')) {
-                // expand the panel
-                $(this).parents('.panel').find('.panel-body').slideDown();
-                $(this).removeClass('panel-collapsed');
-                $(this).find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
-            }
-            else {
-                // collapse the panel
-                $(this).parents('.panel').find('.panel-body').slideUp();
-                $(this).addClass('panel-collapsed');
-                $(this).find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-            }
-        });
+    $('.panel-heading span.clickable').on("click", function (e) {
+        if ($(this).hasClass('panel-collapsed')) {
+            // expand the panel
+            $(this).parents('.panel').find('.panel-body').slideDown();
+            $(this).removeClass('panel-collapsed');
+            $(this).find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+        }
+        else {
+            // collapse the panel
+            $(this).parents('.panel').find('.panel-body').slideUp();
+            $(this).addClass('panel-collapsed');
+            $(this).find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+        }
+    });
 });
