@@ -233,27 +233,19 @@ hr.small {
     padding-top:5px;
     padding-right:0px;
     padding-bottom: 0px;
-}
-
-#news_panel{
     height: 600px;
 }
+
 
 .clickable
 {
     cursor: pointer;
 }
 
-.content{
-    height: 600px;
-}
 
 @media(max-width: 768px){
-    .content{
-        height: 75%;
-    }
-    #news_panel{
-        height: 75%;
+    #news_map{
+        height: 500px;
     }
 }
 
