@@ -45,7 +45,8 @@ import os
 import sys
 import geocoder
 import json
-import click
+# import click
+import time
 
 # handle unicode issues
 class UTF8Recoder:
@@ -217,7 +218,7 @@ def create_article(row_info, location):
 		'dialog_id': row_info['DialogId'],
 		'article_id': row_info['ArtikelId'],
 		'heading': row_info['Ueberschrifttext'],
-		'pub_date': row_info['Datum'],
+		'pub_date': time.mktime(time.strptime(row_info['Datum'], "%d.%m.%Y")),
 		'categories': '%s,%s' % (row_info['Ressort'], row_info['Unterressort']),
 		'text': row_info['Artikeltext'],
 		'address': {
@@ -250,7 +251,8 @@ def populate_db(articles):
 	articles_collection = db.articles
 	# create indexes if not exist
 	articles_collection.create_index([('address.geometry', pymongo.GEOSPHERE)])
-	articles_collection.create_index([('address.coordinates', pymongo.GEO2D)])
+	articles_collection.create_index([('text', pymongo.TEXT), ('heading', pymongo.TEXT)])
+
 
 	# delete existing records
 	records_to_check = []
