@@ -71,6 +71,8 @@ class Article(Resource):
 			
 			# geojson require a properties attribute, we need to do this better!
 			for key, value in article.copy().iteritems():
+				if 'properties' not in article:
+					article['properties'] = {}
 				article['properties'][key] = value
 			article['geometry'] = {}
 			if 'geometry' in article['address']:
