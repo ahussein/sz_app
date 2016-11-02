@@ -68,7 +68,7 @@ class Article(Resource):
 			query_kwargs['fields'] = ({'score': {'$meta': 'textScore'}})
 
 		found_articles = []
-		for article in mongo.db.articles.find(query):
+		for article in mongo.db.articles.find(*query, **query_kwargs):
 			# clean the article reault
 			# article.pop('text')
 			article['address'].pop('bbox')
