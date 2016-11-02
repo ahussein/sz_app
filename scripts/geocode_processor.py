@@ -219,7 +219,8 @@ def create_article(row_info, location):
 		'article_id': row_info['ArtikelId'],
 		'heading': row_info['Ueberschrifttext'],
 		'pub_date': time.mktime(time.strptime(row_info['Datum'], "%d.%m.%Y")),
-		'categories': '%s,%s' % (row_info['Ressort'], row_info['Unterressort']),
+		'categories': row_info['Ressort'],
+		'subcategories': row_info['Unterressort'],
 		'text': row_info['Artikeltext'],
 		'address': {
 			'text': row_info['Handlungsort'],
@@ -251,7 +252,7 @@ def populate_db(articles):
 	articles_collection = db.articles
 	# create indexes if not exist
 	articles_collection.create_index([('address.geometry', pymongo.GEOSPHERE)])
-	articles_collection.create_index([('text', pymongo.TEXT), ('heading', pymongo.TEXT)])
+	articles_collection.create_index([('text', pymongo.TEXT), ('heading', pymongo.TEXT)], default_language="german")
 
 
 	# delete existing records
