@@ -53,18 +53,18 @@ class Article(Resource):
 		location_filter = filters.get('location', {})
 		text_filter = filters.get('text', "")
 		query_kwargs = {}
-		query = []
+		query = {}
 		if location_filter:
 			# for location filter we expect a source point [lat, lng] and a distance in meters
 			if 'source' not in location_filter or 'distance' not in location_filter:
 				result = {'response': "ERROR"}
 				return mongo_jsonfy(result)
-			query.append({"address.geometry": { "$nearSphere": { "$geometry": { "type": "Point", "coordinates": location_filter['source'] }, 
+			query.update({"address.geometry": { "$nearSphere": { "$geometry": { "type": "Point", "coordinates": location_filter['source'] }, 
 						"$maxDistance": location_filter['distance'] } } })
 		# query = {"address.coordinates": SON([("$near", location_filter['source']), ("$maxDistance", location_filter['distance']/ 6378.1)])}
 		# text filter
 		if text_filter:
-			query.append({"$text": {"$search": text_filter}})
+			query.update({"$text": {"$search": text_filter}})
 			# query_kwargs['fields'] = ({'score': {'$meta': 'textScore'}})
 
 		found_articles = []
@@ -76,8 +76,9 @@ class Article(Resource):
 			# 	article['address'].pop('geometry')
 
 			found_articles.append(article)
-			# get distance
-			article['distance'] = _calculate_distance(article['address']['coordinates'], location_filter['source'])
+			if location_filter:
+				# get distance
+				article['distance'] = _calculate_distance(article['address']['coordinates'], location_filter['source'])
 			
 			# geojson require a properties attribute, we need to do this better!
 			for key, value in article.copy().iteritems():
