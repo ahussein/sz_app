@@ -65,7 +65,7 @@ class Article(Resource):
 		# text filter
 		if text_filter:
 			query.append({"$text": {"$search": text_filter}})
-			query_kwargs['fields'] = ({'score': {'$meta': 'textScore'}})
+			# query_kwargs['fields'] = ({'score': {'$meta': 'textScore'}})
 
 		found_articles = []
 		for article in mongo.db.articles.find(*query, **query_kwargs):
