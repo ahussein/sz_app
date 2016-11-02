@@ -68,6 +68,14 @@ class Article(Resource):
 			found_articles.append(article)
 			# get distance
 			article['distance'] = _calculate_distance(article['address']['coordinates'], location_filter['source'])
+			
+			# geojson require a properties attribute, we need to do this better!
+			article['geometry'] = {}
+			if 'geometry' in article['address']:
+				article['geometry'] = article['address']['geometry']
+			for key, value in article.copy().iteritems():
+				article['properties'][key] = value
+
 		result = {'response': found_articles if found_articles else 'No articles found', 'count': len(found_articles)}
 		return mongo_jsonfy(result)
 
