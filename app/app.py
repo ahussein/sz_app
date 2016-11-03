@@ -67,10 +67,12 @@ class Article(Resource):
 		# we cannot have both text and location search in the same query since they are both indexes, we will have to query first will all filters 
 		# and then do another query for the text 
 		for article in mongo.db.articles.find(query, **query_kwargs):
+			found_articles.append(article)
 			all_filters_articles_ids.add(article['dialog_id'])
 
 		# text filter
 		if text_filter:
+			found_articles = []
 			query = {}
 			query = {
 						"$text": {"$search": text_filter},
