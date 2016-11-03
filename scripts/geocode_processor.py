@@ -248,14 +248,13 @@ def populate_db(articles):
 	import pymongo
 	from pymongo import MongoClient
 	from pymongo.errors import BulkWriteError
-	from pymongo.collation import Collation
 
 	client = MongoClient()
 	db = client.sz
 	articles_collection = db.articles
 	# create indexes if not exist
 	articles_collection.create_index([('address.geometry', pymongo.GEOSPHERE)])
-	articles_collection.create_index([('text', pymongo.TEXT), ('heading', pymongo.TEXT)], collation=Collation(locale='de'))
+	articles_collection.create_index([('text', pymongo.TEXT), ('heading', pymongo.TEXT)], default_language='german')
 
 
 	# delete existing records

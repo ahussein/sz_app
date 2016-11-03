@@ -10,7 +10,6 @@ from bson import json_util
 import json
 from bson.son import SON
 from flask_cors import CORS
-from pymongo.collation import Collation
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = "sz"
@@ -53,7 +52,7 @@ class Article(Resource):
 		filters = data.get('filters', {})
 		location_filter = filters.get('location', {})
 		text_filter = filters.get('text', "")
-		query_kwargs = {'collation': Collation(locale='de')}
+		query_kwargs = {}
 		query = {}
 		found_articles = []
 		all_filters_articles_ids = set([])
