@@ -10,6 +10,7 @@ from bson import json_util
 import json
 from bson.son import SON
 from flask_cors import CORS
+import datetime
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = "sz"
@@ -110,7 +111,7 @@ class Article(Resource):
 				article['distance'] = _calculate_distance(article['address']['coordinates'], location_filter['source'])
 
 			article['categories'] = article_categories_map.get(article['categories'], article['categories'])
-			
+			article['pub_date'] = datetime.datetime.fromtimestamp(article['pub_date']).strftime('%d.%m.%Y')
 			# geojson require a properties attribute, we need to do this better!
 			for key, value in article.copy().iteritems():
 				if 'properties' not in article:
