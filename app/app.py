@@ -66,6 +66,7 @@ class Article(Resource):
 			result = {'response': "ERROR"}
 			return mongo_jsonfy(result)
 
+		user_location = data.get('user_location', [])
 		filters = data.get('filters', {})
 		location_filter = filters.get('location', {})
 		text_filter = filters.get('text', "")
@@ -117,7 +118,10 @@ class Article(Resource):
 			# 	article['address'].pop('geometry')
 			if location_filter:
 				# get distance
-				article['distance'] = _calculate_distance(article['address']['coordinates'], location_filter['source'])
+				article['distance'] = _calculate_distance(article['address']['geometry']['coordinates'], location_filter['source'])
+			elif user_location:
+				# if no location filter then calculate the distance based on the current location
+				article['distance'] = _calculate_distance(article['address']['geometry']['coordinates'], user_location)
 
 			article['categories'] = article_categories_map.get(article['categories'], article['categories'])
 			article['pub_date'] = datetime.datetime.fromtimestamp(article['pub_date']).strftime('%d.%m.%Y')
