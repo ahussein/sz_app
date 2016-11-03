@@ -54,6 +54,7 @@ var news_markers = new Map();
 var current_result = {};
 var articles_source_id = "articles";
 var current_user_location = new Array();
+var current_filters = {};
 // mapbox 
 // L.mapbox.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
 // var map = L.mapbox.map('map', 'mapbox.streets')
@@ -193,9 +194,10 @@ function showPosition(position) {
     });
 
     // call the default distance filter
-    default_filter = { filters: {location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}}, 
-                        user_location: current_user_location }
-    query_server(default_filter, null, null)
+    // default_filter = { filters: {location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}}, 
+    //                     user_location: current_user_location }
+    update_filters({location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}})
+    query_server(current_filters, null, null)
 
 }
 
@@ -245,8 +247,12 @@ function create_source(data){
 
 // function to update the map with the latest filte rresults
 function update_map(data){
+    // cleaar the map source and layer
+    if (map.getLayer(articles_source_id) != undefined){
+        map.removeLayer(articles_source_id);
+        map.removeSource(articles_source_id);
+    }
     if (data.count == 0){
-        // cleaar the map source and layer (NOT DONE YET!!!)
         return
     }
     // create/update mapbox source
@@ -265,11 +271,12 @@ function update_map(data){
 
 // function to query the server and return the output
 function query_server(filters, on_success, on_error){
-    console.log(`Querying server with filters ${filters}`)
+    query = {filters: filters, user_location: current_user_location}
+    console.log(`Querying server with query ${query}`)
     var url = 'http://185.69.164.90:8090/api';
     var type = 'post';
     var content_type = "application/json; charset=utf-8";
-    var data = JSON.stringify(filters)
+    var data = JSON.stringify(query)
 
     jQuery.ajax( {
         url: url,
@@ -319,4 +326,18 @@ jQuery(function ($) {
             $(this).find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
         }
     });
+});
+
+function update_filters(filter){
+    current_filters = Object.assign({}, current_filters, filter);
+}
+
+function on_search_button_clicked(){
+    var search_text = document.getElementById("search_input").value
+    update_filters({text: search_text})
+    query_server(current_filters, null, null)
+}
+
+$(document).ready(function(){
+    document.getElementById("seach_button").onclick = on_search_button_clicked;
 });
