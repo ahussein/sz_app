@@ -73,10 +73,8 @@ class Article(Resource):
 		# text filter
 		if text_filter:
 			found_articles = []
-			query = {}
 			query = {
 						"$text": {"$search": text_filter},
-						'_txtscr': {'$meta': 'textScore'},
 						'dialog_id': {'$in': list(all_filters_articles_ids)}
 					}
 			for article in mongo.db.article.find(query, **query_kwargs):
