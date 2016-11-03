@@ -53,6 +53,7 @@ $(document).scroll(function() {
 var news_markers = new Map();
 var current_result = {};
 var articles_source_id = "articles";
+var current_user_location = new Array();
 // mapbox 
 // L.mapbox.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
 // var map = L.mapbox.map('map', 'mapbox.streets')
@@ -140,8 +141,9 @@ function create_marker(marker_type, map_obj, marker_data){
         .setLngLat([marker_data.position.longitude, marker_data.position.latitude])
         .addTo(map_obj); 
 }
-function showPosition(position) {
 
+function showPosition(position) {
+    current_user_location = [position.coords.longitude, position.coords.latitude];
     map.flyTo({
         center: [position.coords.longitude, position.coords.latitude],
         // test with berlin as a center point
@@ -191,7 +193,8 @@ function showPosition(position) {
     });
 
     // call the default distance filter
-    default_filter = { filters: {location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}} }
+    default_filter = { filters: {location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}}, 
+                        user_location: current_user_location }
     query_server(default_filter, null, null)
 
 }
