@@ -72,16 +72,13 @@ class Article(Resource):
 
 		# text filter
 		if text_filter:
-			text_matched_articles = []
+			found_articles = []
 			query = {
 						"$text": {"$search": text_filter},
 						'dialog_id': {'$in': list(all_filters_articles_ids)}
 					}
 			for article in mongo.db.articles.find(query, **query_kwargs):
-				text_matched_articles.append(article)
-			for article in list(found_articles):
-				if article not in text_matched_articles:
-					found_articles.remove(article)
+				found_articles.append(article)
 
 		for article in found_articles:
 			# clean the article reault
@@ -103,6 +100,10 @@ class Article(Resource):
 				article['geometry'] = article['address']['geometry']
 			article['type'] = 'Feature'
 
+		# make sure to sort by distance if locatio filter is enabled
+		if location_filter:
+			from operator import itemgetter
+			found_articles.sort(key=itemgetter('distance'))
 		result = {'response': found_articles if found_articles else 'No articles found', 'count': len(found_articles)}
 		return mongo_jsonfy(result)
 
