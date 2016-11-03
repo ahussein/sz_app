@@ -55,6 +55,8 @@ var current_result = {};
 var articles_source_id = "articles";
 var current_user_location = new Array();
 var current_filters = {};
+var current_sources = new Array();
+var current_layers = new Array();
 // mapbox 
 // L.mapbox.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
 // var map = L.mapbox.map('map', 'mapbox.streets')
@@ -241,17 +243,25 @@ function create_source(data){
         "data": {
             "type": "FeatureCollection",
             "features": data.response
-        }
+        },
+        "cluster": true,
+        "clusterRadius": 10
     });
+    current_sources.push(articles_source_id);
 }
 
 // function to update the map with the latest filte rresults
 function update_map(data){
     // cleaar the map source and layer
-    if (map.getLayer(articles_source_id) != undefined){
-        map.removeLayer(articles_source_id);
-        map.removeSource(articles_source_id);
-    }
+    current_layers.forEach(function(layer_id){
+        map.removeLayer(layer_id);
+    });
+    current_sources.forEach(function(source_id){
+        map.removeSource(source_id)
+    });
+    current_layers = new Array();
+    current_sources = new Array();
+    
     if (data.count == 0){
         return
     }
@@ -262,11 +272,56 @@ function update_map(data){
         "id": articles_source_id,
         "type": "symbol",
         "source": articles_source_id,
+        "filter": ["!has", "point_count"],
         "layout": {
             "icon-image": "castle-15",
             "icon-allow-overlap": true
         }
     });
+    current_layers.push(articles_source_id)
+    // Display the earthquake data in three layers, each filtered to a range of
+    // count values. Each range gets a different fill color.
+    var layers = [
+        [10, '#f28cb1'],
+        [5, '#f1f075'],
+        [0, '#51bbd6']
+    ];
+
+    layers.forEach(function (layer, i) {
+        layer_id = "cluster-" + i 
+        map.addLayer({
+            "id": layer_id,
+            "type": "circle",
+            "source": articles_source_id,
+            "paint": {
+                "circle-color": layer[1],
+                "circle-radius": 18
+            },
+            "filter": i === 0 ?
+                [">=", "point_count", layer[0]] :
+                ["all",
+                    [">=", "point_count", layer[0]],
+                    ["<", "point_count", layers[i - 1][0]]]
+        });
+        current_layers.push(layer_id)
+    });
+
+    // Add a layer for the clusters' count labels
+    var cluster_count_layer_id = "cluster-count";
+    map.addLayer({
+        "id": cluster_count_layer_id,
+        "type": "symbol",
+        "source": articles_source_id,
+        "layout": {
+            "text-field": "{point_count}",
+            "text-font": [
+                "DIN Offc Pro Medium",
+                "Arial Unicode MS Bold"
+            ],
+            "text-size": 12
+        }
+    });
+    current_layers.push(cluster_count_layer_id)
 }
 
 // function to query the server and return the output
