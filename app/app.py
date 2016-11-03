@@ -77,7 +77,7 @@ class Article(Resource):
 						"$text": {"$search": text_filter},
 						'dialog_id': {'$in': list(all_filters_articles_ids)}
 					}
-			for article in mongo.db.article.find(query, **query_kwargs):
+			for article in mongo.db.articles.find(query, **query_kwargs):
 				found_articles.append(article)
 
 		for article in found_articles:
