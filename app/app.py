@@ -67,7 +67,7 @@ class Article(Resource):
 		filters = data.get('filters', {})
 		location_filter = filters.get('location', {})
 		text_filter = filters.get('text', "")
-		categories_filter = filgers.get('categories', [])
+		categories_filter = filters.get('categories', [])
 		query_kwargs = {}
 		query = {}
 		found_articles = []
