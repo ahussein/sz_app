@@ -11,6 +11,7 @@ import json
 from bson.son import SON
 from flask_cors import CORS
 import datetime
+import time
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = "sz"
@@ -69,6 +70,7 @@ class Article(Resource):
 		location_filter = filters.get('location', {})
 		text_filter = filters.get('text', "")
 		categories_filter = filters.get('categories', [])
+		time_filter = filters.get("time", [])
 		query_kwargs = {}
 		query = {}
 		found_articles = []
@@ -83,6 +85,13 @@ class Article(Resource):
 		if categories_filter:
 			categories_filter = [article_categories_reverse_map.get(item, item) for item in list(categories_filter)]
 			query.update({'categories': {'$in': categories_filter}})
+
+		if time_filter:
+			# time filter is in a range formate (from, to)
+			from_date = time.mktime(time.strptime(time_filter[0], "%d.%m.%Y"))
+			to_date = time.mktime(time.strptime(time_filter[1], "%d.%m.%Y"))
+			# query.update({'$and': [ {'pub_date': {'$gt': from_date}}, {'pub_date': {'$lt': to_date}} ]})
+			query.update({'pub_date': {'$gt': from_date, '$lt': to_date}})
 			
 		# we cannot have both text and location search in the same query since they are both indexes, we will have to query first will all filters 
 		# and then do another query for the text 
