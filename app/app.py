@@ -16,7 +16,22 @@ app.config['MONGO_DBNAME'] = "sz"
 CORS(app)
 mongo = PyMongo(app, config_prefix="MONGO")
 
+article_categories_map = {
+	"LOKDRS_R": "Lokales Dresden",
+	"WISSE_R": "Wissen",
+	"SEITE3": "Seite3",
+    "FEU_R": "Feuilleton",
+    "PL_R": "Politik",
+    "LEBEN_R": "Leben",
+    "TITEL_R": "Titelseite",
+    "SP_R": "Sport",
+    "WI_R": "Wirtschaft",
+    "PAN_R": "Panorama",
+    "BE":  "Magazin", 
+    "LF_R": "Leserforum"
+}
 
+article_categories_reverse_map = {v: k for k, v in article_categories_map.iteritems()}
 
 def mongo_jsonfy(data):
 	"""
@@ -52,6 +67,7 @@ class Article(Resource):
 		filters = data.get('filters', {})
 		location_filter = filters.get('location', {})
 		text_filter = filters.get('text', "")
+		categories_filter = filgers.get('categories', [])
 		query_kwargs = {}
 		query = {}
 		found_articles = []
@@ -63,6 +79,9 @@ class Article(Resource):
 				return mongo_jsonfy(result)
 			query.update({"address.geometry": { "$nearSphere": { "$geometry": { "type": "Point", "coordinates": location_filter['source'] }, 
 						"$maxDistance": location_filter['distance'] } } })
+		if categories_filter:
+			categories_filter = [article_categories_reverse_map.get(item, item) for item in list(categories_filter)]
+			query.update({'categories': {'$in': categories_filter}})
 			
 		# we cannot have both text and location search in the same query since they are both indexes, we will have to query first will all filters 
 		# and then do another query for the text 
@@ -89,6 +108,8 @@ class Article(Resource):
 			if location_filter:
 				# get distance
 				article['distance'] = _calculate_distance(article['address']['coordinates'], location_filter['source'])
+
+			article['categories'] = article_categories_map.get(article['categories'], article['categories'])
 			
 			# geojson require a properties attribute, we need to do this better!
 			for key, value in article.copy().iteritems():
