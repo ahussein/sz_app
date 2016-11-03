@@ -91,7 +91,7 @@ class Article(Resource):
 			from_date = time.mktime(time.strptime(time_filter[0], "%d.%m.%Y"))
 			to_date = time.mktime(time.strptime(time_filter[1], "%d.%m.%Y"))
 			# query.update({'$and': [ {'pub_date': {'$gt': from_date}}, {'pub_date': {'$lt': to_date}} ]})
-			query.update({'pub_date': {'$gt': from_date, '$lt': to_date}})
+			query.update({'pub_date': {'$gte': from_date, '$lte': to_date}})
 			
 		# we cannot have both text and location search in the same query since they are both indexes, we will have to query first will all filters 
 		# and then do another query for the text 
