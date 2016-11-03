@@ -10,6 +10,7 @@ from bson import json_util
 import json
 from bson.son import SON
 from flask_cors import CORS
+from pymongo.collation import Collation
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = "sz"
@@ -52,8 +53,10 @@ class Article(Resource):
 		filters = data.get('filters', {})
 		location_filter = filters.get('location', {})
 		text_filter = filters.get('text', "")
-		query_kwargs = {}
+		query_kwargs = {'collation': Collation(locale='de')}
 		query = {}
+		found_articles = []
+		all_filters_articles_ids = set([])
 		if location_filter:
 			# for location filter we expect a source point [lat, lng] and a distance in meters
 			if 'source' not in location_filter or 'distance' not in location_filter:
@@ -61,21 +64,29 @@ class Article(Resource):
 				return mongo_jsonfy(result)
 			query.update({"address.geometry": { "$nearSphere": { "$geometry": { "type": "Point", "coordinates": location_filter['source'] }, 
 						"$maxDistance": location_filter['distance'] } } })
-		# query = {"address.coordinates": SON([("$near", location_filter['source']), ("$maxDistance", location_filter['distance']/ 6378.1)])}
+			
+		# we cannot have both text and location search in the same query since they are both indexes, we will have to query first will all filters 
+		# and then do another query for the text 
+		for article in mongo.db.articles.find(query, **query_kwargs):
+			all_filters_articles_ids.add(article['dialog_id'])
+
 		# text filter
 		if text_filter:
-			query.update({"$text": {"$search": text_filter}})
-			# query_kwargs['fields'] = ({'score': {'$meta': 'textScore'}})
+			query = {}
+			query = {
+						"$text": {"$search": text_filter},
+						'_txtscr': {'$meta': 'textScore'},
+						'dialog_id': {'$in': list(all_filters_articles_ids)}
+					}
+			for article in mongo.db.article.find(query, **query_kwargs):
+				found_articles.append(article)
 
-		found_articles = []
-		for article in mongo.db.articles.find(query, **query_kwargs):
+		for article in found_articles:
 			# clean the article reault
 			# article.pop('text')
 			article['address'].pop('bbox')
 			# if 'geometry' in article['address']:
 			# 	article['address'].pop('geometry')
-
-			found_articles.append(article)
 			if location_filter:
 				# get distance
 				article['distance'] = _calculate_distance(article['address']['coordinates'], location_filter['source'])

@@ -48,6 +48,7 @@ import json
 # import click
 import time
 
+
 # handle unicode issues
 class UTF8Recoder:
     """
@@ -244,15 +245,17 @@ def populate_db(articles):
 	@param articles: List of articles
 	@type articles: list
 	"""
-	from pymongo import MongoClient
 	import pymongo
+	from pymongo import MongoClient
 	from pymongo.errors import BulkWriteError
+	from pymongo.collation import Collation
+
 	client = MongoClient()
 	db = client.sz
 	articles_collection = db.articles
 	# create indexes if not exist
 	articles_collection.create_index([('address.geometry', pymongo.GEOSPHERE)])
-	articles_collection.create_index([('text', pymongo.TEXT), ('heading', pymongo.TEXT)], default_language="german")
+	articles_collection.create_index([('text', pymongo.TEXT), ('heading', pymongo.TEXT)], collation=Collation(locale='de'))
 
 
 	# delete existing records
