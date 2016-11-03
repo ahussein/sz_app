@@ -66,7 +66,8 @@ var current_layers = new Array();
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/light-v9'
+    // style: 'mapbox://styles/mapbox/light-v9'
+    style: 'mapbox://styles/abdelrahmanhussein/civ307qxk000u2iozvu6xz1rx'
 });
 
 // Add zoom and rotation controls to the map.
@@ -222,9 +223,13 @@ map.on('click', function (e) {
 
     // Populate the popup and set its coordinates
     // based on the feature found.
+    var div = window.document.createElement('div');
+    var text = feature.properties.text.slice(0, 200) + "...";
+    div.innerHTML = `<h5>${feature.properties.heading}</h5><p>${text}</p><a href='http://www.sz-online.de/' target="_blank">Read more</a>`;
     var popup = new mapboxgl.Popup()
         .setLngLat(feature.geometry.coordinates)
-        .setHTML(feature.properties.text.slice(0, 200) + "...")
+        // .setHTML(feature.properties.text.slice(0, 200) + "...")
+        .setDOMContent(div)
         .addTo(map);
 });
 
@@ -274,7 +279,7 @@ function update_map(data){
         "source": articles_source_id,
         "filter": ["!has", "point_count"],
         "layout": {
-            "icon-image": "castle-15",
+            "icon-image": "newspaper",
             "icon-allow-overlap": true
         }
     });
