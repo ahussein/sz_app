@@ -23,6 +23,10 @@
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
+    <script src="js/bootstrap-slider.js"></script>
+    <link href="css/slider.css" rel="stylesheet"/>
+    
+
     <!-- Custom CSS -->
     <link href="css/stylish-portfolio.css" rel="stylesheet">
 
@@ -53,13 +57,13 @@
                 <a href="#top" onclick=$("#menu-close").click();>Home</a>
             </li>
             <li>
-                <a href="#filters" onclick=$("#menu-close").click();>Filters</a>
+                <a href="#filters_panel" onclick=$("#menu-close").click();>Filters</a>
             </li>
             <li>
                 <a href="#news_panel" onclick=$("#menu-close").click();>News Map</a>
             </li>
             <li>
-                <a href="#news_lists" onclick=$("#menu-close").click();>News lists</a>
+                <a href="#news_lists_panel" onclick=$("#menu-close").click();>News lists</a>
             </li>
             <li>
                 <a href="#contact" onclick=$("#menu-close").click();>Contact</a>
@@ -110,6 +114,39 @@
         </div>
     </div>
 
+    <!-- Filters -->
+    
+    <div class="panel panel-default" id="filters_panel">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+            <strong>Filters</strong>
+            <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
+        </h4>
+
+      </div>
+      <section class="panel-collapse collapse in content panel-body">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h4>Distance</h4>
+                </div>
+            </div>
+            <div class="row">
+                <!-- <div class="col-md-2">
+                    <strong>Source Location</strong> 
+                </div>
+                <div class="col-md-1">
+                    <input type="text" placeholder="Current Location" id="location_source"/>
+                </div> -->
+                <div class="col-sx-3">
+                    <input type="range" min="0" max="10000" value="1000" step="200" id="distance_slider"/>
+                    <span id="range">1500 m</span>
+                </div>
+            </div>
+        </div>
+      </section>
+    </div>
+
     <!-- Map -->
     <div class="panel panel-default" id="news_panel">
       <div class="panel-heading">
@@ -121,16 +158,20 @@
 
       </div>
       <section id="news_map" class="panel-collapse collapse in content panel-body">
-        <div class="ontainer" id="map">
+        <div id="map">
         </div>
       </section>
     </div>
    
 
     <!-- news lists -->
-    <section id="news_list" class="container content">
-        <h3> News Lists</h3>
-    </section>
+    <div class="panel panel-default" id="news_lists_panel">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+            <strong>News Lists</strong>
+        </h4>
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer id='contact'>
@@ -179,7 +220,6 @@
 
     <!-- Custom Theme JavaScript -->
     <script>
-
    
 
     // Disable Google Maps scrolling

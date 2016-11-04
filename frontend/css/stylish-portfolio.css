@@ -326,3 +326,10 @@ footer {
         font: 10px/15px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     }
 }
+
+
+/*news lists*/
+.news_list_header{
+    height: 50px;
+    background-color: #f5f5f5;
+}

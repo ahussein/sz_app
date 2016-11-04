@@ -398,6 +398,16 @@ function on_search_button_clicked(){
     query_server(current_filters, null, null)
 }
 
+function on_distance_slider_change(){
+    var distance = parseInt(document.getElementById("distance_slider").value)
+    document.getElementById("range").innerHTML = distance + " m";
+    update_filters({location: {source: current_user_location, distance: distance}})
+    query_server(current_filters, null, null)
+}
+
 $(document).ready(function(){
     document.getElementById("seach_button").onclick = on_search_button_clicked;
+    document.getElementById("distance_slider").onchange = on_distance_slider_change;
 });
+
+
