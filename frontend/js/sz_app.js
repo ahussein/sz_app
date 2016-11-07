@@ -398,16 +398,110 @@ function on_search_button_clicked(){
     query_server(current_filters, null, null)
 }
 
-function on_distance_slider_change(){
-    var distance = parseInt(document.getElementById("distance_slider").value)
-    document.getElementById("range").innerHTML = distance + " m";
-    update_filters({location: {source: current_user_location, distance: distance}})
+function on_distance_slider_change(distance){
+    update_filters({location: {source: current_user_location, distance: parseInt(distance)}})
     query_server(current_filters, null, null)
 }
 
 $(document).ready(function(){
     document.getElementById("seach_button").onclick = on_search_button_clicked;
-    document.getElementById("distance_slider").onchange = on_distance_slider_change;
+    var distance_slider = document.getElementById("distance_slider");
+    noUiSlider.create(distance_slider, {
+        start: 1500,
+
+        // Disable animation on value-setting,
+        // so the sliders respond immediately.
+        animate: false,
+        range: {
+            min: 0,
+            max: 10000
+        }
+    });
+    distance_slider.noUiSlider.on('update', function(values, handle){
+        document.getElementById("range").innerHTML = values[handle] + " m";
+        
+    });
+    distance_slider.noUiSlider.on('change', function(values, handle){
+        on_distance_slider_change(values[handle]);
+    });
+
+    var dateSlider = document.getElementById('time_slider');
+
+    var today = new Date();
+    var two_months_ago = new Date();
+    two_months_ago.setDate(today.getDate() - 60);
+
+    noUiSlider.create(dateSlider, {
+    // Create two timestamps to define a range.
+        range: {
+            min: timestamp('June 1, 2016'),
+            max: new Date().getTime()
+        },
+
+    // Steps of one day
+        step: 1 * 24 * 60 * 60 * 1000,
+
+    // Two more timestamps indicate the handle starting positions.
+        start: [ two_months_ago.getTime(),  today.getTime()],
+
+    // No decimals
+        format: wNumb({
+            decimals: 0
+        })
+    });
+    var dateValues = [
+        document.getElementById('event-start'),
+        document.getElementById('event-end')
+    ];
+
+    dateSlider.noUiSlider.on('update', function( values, handle ) {
+        dateValues[handle].innerHTML = formatDate(new Date(+values[handle]));
+        update_filters({time: [values[0], values[1]]})
+        query_server(current_filters, null, null)
+    });
 });
+
+
+// Create a new date from a string, return as a timestamp.
+function timestamp(str){
+    return new Date(str).getTime();   
+}
+
+// Create a list of day and monthnames.
+var
+    weekdays = [
+        "Sunday", "Monday", "Tuesday",
+        "Wednesday", "Thursday", "Friday",
+        "Saturday"
+    ],
+    months = [
+        "January", "February", "March",
+        "April", "May", "June", "July",
+        "August", "September", "October",
+        "November", "December"
+    ];
+
+// Append a suffix to dates.
+// Example: 23 => 23rd, 1 => 1st.
+function nth (d) {
+  if(d>3 && d<21) return 'th';
+  switch (d % 10) {
+        case 1:  return "st";
+        case 2:  return "nd";
+        case 3:  return "rd";
+        default: return "th";
+    }
+}
+
+// Create a string representation of the date.
+function formatDate ( date ) {
+    return weekdays[date.getDay()] + ", " +
+        date.getDate() + nth(date.getDate()) + " " +
+        months[date.getMonth()] + " " +
+        date.getFullYear();
+}
+
+
+
 
 

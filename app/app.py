@@ -89,8 +89,12 @@ class Article(Resource):
 
 		if time_filter:
 			# time filter is in a range formate (from, to)
-			from_date = time.mktime(time.strptime(time_filter[0], "%d.%m.%Y"))
-			to_date = time.mktime(time.strptime(time_filter[1], "%d.%m.%Y"))
+			if type(time_filter[0]) == str or time_filter[0].isdigit():
+				from_date = int(time_filter[0])
+				to_date = int(time_filter[1])
+			else:  
+				from_date = time.mktime(time.strptime(time_filter[0], "%d.%m.%Y"))
+				to_date = time.mktime(time.strptime(time_filter[1], "%d.%m.%Y"))
 			# query.update({'$and': [ {'pub_date': {'$gt': from_date}}, {'pub_date': {'$lt': to_date}} ]})
 			query.update({'pub_date': {'$gte': from_date, '$lte': to_date}})
 			
