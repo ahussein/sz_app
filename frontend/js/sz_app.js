@@ -456,8 +456,14 @@ $(document).ready(function(){
 
     dateSlider.noUiSlider.on('update', function( values, handle ) {
         dateValues[handle].innerHTML = formatDate(new Date(+values[handle]));
-        update_filters({time: [values[0], values[1]]})
-        query_server(current_filters, null, null)
+        var from_date = new Date(+values[0])
+        from_date = from_date.getDate() + "." + (parseInt(from_date.getMonth()) + 1) + "." + from_date.getFullYear();
+        var to_date = new Date(+values[1])
+        to_date = to_date.getDate() + "." + (parseInt(to_date.getMonth()) + 1) + "." + to_date.getFullYear();
+        update_filters({time: [from_date, to_date]});
+    });
+    dateSlider.noUiSlider.on('change', function( values, handle ) {
+        query_server(current_filters, null, null);
     });
 });
 
