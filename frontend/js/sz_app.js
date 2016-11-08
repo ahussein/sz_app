@@ -465,6 +465,12 @@ $(document).ready(function(){
     dateSlider.noUiSlider.on('change', function( values, handle ) {
         query_server(current_filters, null, null);
     });
+
+    $("#search_input").keyup(function(event){
+        if(event.keyCode == 13){
+            $("#seach_button").click();
+        }
+    });
 });
 
 
