@@ -57,6 +57,8 @@ var current_user_location = new Array();
 var current_filters = {};
 var current_sources = new Array();
 var current_layers = new Array();
+var current_source_location = new Array();
+var current_location_marker = null;
 // mapbox 
 // L.mapbox.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
 // var map = L.mapbox.map('map', 'mapbox.streets')
@@ -120,6 +122,15 @@ map.on('zoom', function(){
     }
 });
 
+
+ // map.on('dragend', function(){
+ //    console.log('Map center is' + map.getCenter());
+ // });
+
+ map.on('moveend', function(eventData){
+    console.log('Map center is' + map.getCenter());
+});
+
 // get the current user location 
 function getLocation() {
     if (navigator.geolocation) {
@@ -146,10 +157,10 @@ function create_marker(marker_type, map_obj, marker_data){
         .addTo(map_obj); 
 }
 
-function showPosition(position) {
-    current_user_location = [position.coords.longitude, position.coords.latitude];
+
+function fly_to(location){
     map.flyTo({
-        center: [position.coords.longitude, position.coords.latitude],
+        center: location,
         // test with berlin as a center point
         // center: [13.409660, 52.513728],
         zoom: 12,
@@ -168,39 +179,46 @@ function showPosition(position) {
             return t;
         }
     });
+    marker_data = {
+                    size:[24, 24],
+                    position: {
+                        longitude: location[0],
+                        latitude: location[1]
+                        // test with berlin as a center point
+                        // longitude: 13.409660,
+                        // latitude: 52.513728
+                    },
+                   }
+    if(current_location_marker != null){
+        current_location_marker.remove();
+    }
+    create_marker('location', map, marker_data)
+    // create a DOM element for the marker
+    // var el = document.createElement('div');
+    // el.className = 'marker';
+    // el.id = 'marker_current_location'
+    // el.style.backgroundImage = 'url(./img/location_marker.png)';
+    // el.style.width = '40px';
+    // el.style.height = '40px';
 
+    // // add marker to map
+    // new mapboxgl.Marker(el, {offset: [-40 / 2, -40 / 2]})
+    //     .setLngLat([position.coords.longitude, position.coords.latitude])
+    //     .addTo(map);
 
-    map.on('moveend', function(eventData){
-        marker_data = {
-                        size:[24, 24],
-                        position: {
-                            longitude: position.coords.longitude,
-                            latitude: position.coords.latitude
-                            // test with berlin as a center point
-                            // longitude: 13.409660,
-                            // latitude: 52.513728
-                        },
-                       }
-        create_marker('location', map, marker_data)
-        // create a DOM element for the marker
-        // var el = document.createElement('div');
-        // el.className = 'marker';
-        // el.id = 'marker_current_location'
-        // el.style.backgroundImage = 'url(./img/location_marker.png)';
-        // el.style.width = '40px';
-        // el.style.height = '40px';
+    query_server(current_filters, null, null)
 
-        // // add marker to map
-        // new mapboxgl.Marker(el, {offset: [-40 / 2, -40 / 2]})
-        //     .setLngLat([position.coords.longitude, position.coords.latitude])
-        //     .addTo(map);
-    });
+}
+
+function showPosition(position) {
+    current_user_location = [position.coords.longitude, position.coords.latitude];
+    current_source_location = current_user_location;
+    update_filters({location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}});
+    fly_to([position.coords.longitude, position.coords.latitude]);
 
     // call the default distance filter
     // default_filter = { filters: {location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}}, 
     //                     user_location: current_user_location }
-    update_filters({location: {source: [position.coords.longitude, position.coords.latitude], distance: 1500}})
-    query_server(current_filters, null, null)
 
 }
 
@@ -331,7 +349,8 @@ function update_map(data){
 
 // function to query the server and return the output
 function query_server(filters, on_success, on_error){
-    query = {filters: filters, user_location: current_user_location}
+    filters.location.source = current_source_location;
+    query = {filters: filters, user_location: current_user_location};
     console.log(`Querying server with query ${query}`)
     var url = 'http://185.69.164.90:8090/api';
     var type = 'post';
@@ -399,7 +418,7 @@ function on_search_button_clicked(){
 }
 
 function on_distance_slider_change(distance){
-    update_filters({location: {source: current_user_location, distance: parseInt(distance)}})
+    update_filters({location: {source: current_source_location, distance: parseInt(distance)}})
     query_server(current_filters, null, null)
 }
 
@@ -469,6 +488,25 @@ $(document).ready(function(){
     $("#search_input").keyup(function(event){
         if(event.keyCode == 13){
             $("#seach_button").click();
+        }
+    });
+
+    $("#source_location_input").keyup(function(event){
+        if(event.keyCode == 13){
+            var source_location_text = document.getElementById("source_location_input").value
+            if (source_location_text == ""){
+                current_source_location = current_user_location;
+                fly_to(current_source_location);
+            }else{
+                var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
+                openStreetMapGeocoder.geocode(source_location_text, function(result) {
+                        console.log(result);
+                        if (result.length > 0){
+                            current_source_location = [result[0].longitude, result[1].latitude];
+                            fly_to(current_source_location);
+                        }
+                  });
+            }   
         }
     });
 });
@@ -595,5 +633,5 @@ $(function () {
         init();
     });
     update_topic_filters();
-    query_server(current_filters, null, null);
+    // query_server(current_filters, null, null);
 });

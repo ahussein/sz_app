@@ -124,10 +124,19 @@
       <section class="panel-collapse collapse in content panel-body">
         <div class="container">
             <div class="row">
+                <div class="col-md-12">
+                    <div class="input-group">
+                      <span class="input-group-addon" id="basic-addon1">Source Location</span>
+                      <input type="text" class="form-control" placeholder="Current User Location" aria-describedby="basic-addon1" id="source_location_input">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-lg-12">
                     <h4>Distance</h4>
                 </div>
             </div>
+
             <div class="row">
                 <!-- <div class="col-md-2">
                     <strong>Source Location</strong> 
@@ -299,6 +308,9 @@
 
     <script src="js/nouislider.min.js"></script>
     <script src="js/wNumb.js"></script>
+
+    <script src="js/geocoder.js"></script>
+    <script src="js/geocoder.min.js"></script>
 
     <!-- Custom javascript -->
     <script src="js/sz_app.js" charset="UTF-8"></script>
