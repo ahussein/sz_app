@@ -26,6 +26,7 @@
 
     <!-- Custom CSS -->
     <link href="css/stylish-portfolio.css" rel="stylesheet">
+    <link href="css/custom_news_list.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -60,7 +61,10 @@
                 <a href="#news_panel" onclick=$("#menu-close").click();>News Map</a>
             </li>
             <li>
-                <a href="#news_lists_panel" onclick=$("#menu-close").click();>News lists</a>
+                <a href="#news_list" onclick=$("#menu-close").click();>News list</a>
+            </li>
+            <li>
+                <a href="#news_around_you" onclick=$("#menu-close").click();>People around me reading...</a>
             </li>
             <li>
                 <a href="#contact" onclick=$("#menu-close").click();>Contact</a>
@@ -268,53 +272,97 @@
    
 
     <!-- news lists -->
-    <div class="bs-example" id="news_lists_panel"> 
-        <div class="container list_content" id="news_list_container">
-            <div class="row">
-                <div class="col-sm-12 col-md-6">
+    <div class="container list_content" id="news_list_container">
+        <div class="row">
+            <div class="col-sm-12 col-lg-6">
+                <div class="bs-example" id="news_list"> 
                     <div class="list-group"> 
-                        <a href="#" class="list-group-item active"> 
-                            <h4 class="list-group-item-heading">List group item heading</h4> 
-                            <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
-                        </a> 
-                        <a href="#" class="list-group-item"> 
-                            <h4 class="list-group-item-heading">List group item heading</h4> 
-                            <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
-                        </a> 
-                        <a href="#" class="list-group-item"> 
-                            <h4 class="list-group-item-heading">List group item heading</h4> 
-                            <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
-                        </a> 
-                    </div>
-                </div>
-                <div class="col-sm-12 col-md-6">
-                    <div class="list-group"> 
-                        <a href="#" class="list-group-item active"> 
-                            <h4 class="list-group-item-heading">List group item heading</h4> 
-                            <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
-                        </a> 
-                        <a href="#" class="list-group-item"> 
-                            <h4 class="list-group-item-heading">List group item heading</h4> 
-                            <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
-                        </a> 
-                        <a href="#" class="list-group-item"> 
-                            <h4 class="list-group-item-heading">List group item heading</h4> 
-                            <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
-                        </a> 
-                    </div>
-                </div>
+                        <ul class="event-list">
+                            <li>
+                                <time datetime="2014-07-20 2000">
+                                    <span class="day">20</span>
+                                    <span class="month">Jan</span>
+                                    <span class="year">2014</span>
+                                    <span class="time">8:00 PM</span>
+                                </time>
+                                <div class="info">
+                                    <h2 class="title">Mouse0270's 24th Birthday!</h2>
+                                    <p class="desc">Bar Hopping in Erie, Pa.</p>
+                                    <ul>
+                                        <li style="width:20%;">5 <span class="fa fa-thumbs-o-up"></span></a></li>
+                                        <li style="width:20%;">Read More <span class="fa fa-globe"></span></li>
+                                        <li style="width:20%;">3 <span class="fa fa-newspaper-o"></span></li>
+                                        <li style="width:20%;">103 m</li>
+                                    </ul>
+                                </div>
+                                <div class="social">
+                                    <ul>
+                                        <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
+                                        <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
+                                        <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
+    
+                                    </ul>
+                                </div>
+                            </li>
 
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </div>  
-    </div>
+            <div class="col-sm-12 col-lg-6">
+                <div class="bs-example" id="news_around_you"> 
+                    <div class="list-group"> 
+                        <ul class="event-list">
+                            <li>
+                                <time datetime="2014-07-20 2000">
+                                    <span class="day">20</span>
+                                    <span class="month">Jan</span>
+                                    <span class="year">2014</span>
+                                    <span class="time">8:00 PM</span>
+                                </time>
+                                <div class="info">
+                                    <h2 class="title">Mouse0270's 24th Birthday!</h2>
+                                    <p class="desc">Bar Hopping in Erie, Pa.</p>
+                                    <ul>
+                                        <li style="width:20%;">5 <span class="fa fa-thumbs-o-up"></span></a></li>
+                                        <li style="width:20%;">Read More <span class="fa fa-globe"></span></li>
+                                        <li style="width:20%;">3 <span class="fa fa-newspaper-o"></span></li>
+                                        <li style="width:20%;">103 m</li>
+                                    </ul>
+                                </div>
+                                <div class="social">
+                                    <ul>
+                                        <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
+                                        <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
+                                        <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
+    
+                                    </ul>
+                                </div>
+                            </li>
 
-    <!-- <div class="panel panel-default" id="news_lists_panel">
-      <div class="panel-heading">
-        <h4 class="panel-title">
-            <strong>News Lists</strong>
-        </h4>
-      </div>
-    </div> -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-sm-12 col-md-6">
+                <div class="list-group"> 
+                    <a href="#" class="list-group-item active"> 
+                        <h4 class="list-group-item-heading">List group item heading</h4> 
+                        <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
+                    </a> 
+                    <a href="#" class="list-group-item"> 
+                        <h4 class="list-group-item-heading">List group item heading</h4> 
+                        <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
+                    </a> 
+                    <a href="#" class="list-group-item"> 
+                        <h4 class="list-group-item-heading">List group item heading</h4> 
+                        <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
+                    </a> 
+                </div>
+            </div> -->
+
+        </div>
+    </div> 
 
     <!-- Footer -->
     <footer id='contact'>

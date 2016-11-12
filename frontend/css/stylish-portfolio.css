@@ -366,9 +366,16 @@ footer {
     color: #959595;
     text-transform: uppercase;
     letter-spacing: 1px;
-    content: "News List";
 }
 
 .list_content{
     width: 100%;
+}
+
+#news_list:after{
+    content: "News List";
+}
+
+#news_around_you:after{
+    content: "People around me are reading...";
 }
