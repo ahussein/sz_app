@@ -273,37 +273,40 @@
 
     <!-- news lists -->
     <div class="container list_content" id="news_list_container">
+    </div>
+    <script id="articels-template" type="text/x-handlebars-template">
         <div class="row">
             <div class="col-sm-12 col-lg-6">
                 <div class="bs-example" id="news_list"> 
                     <div class="list-group"> 
                         <ul class="event-list">
-                            <li>
-                                <time datetime="2014-07-20 2000">
-                                    <span class="day">20</span>
-                                    <span class="month">Jan</span>
-                                    <span class="year">2014</span>
-                                    <span class="time">8:00 PM</span>
-                                </time>
-                                <div class="info">
-                                    <h2 class="title">Mouse0270's 24th Birthday!</h2>
-                                    <p class="desc">Bar Hopping in Erie, Pa.</p>
-                                    <ul>
-                                        <li style="width:20%;">5 <span class="fa fa-thumbs-o-up"></span></a></li>
-                                        <li style="width:20%;">Read More <span class="fa fa-globe"></span></li>
-                                        <li style="width:20%;">3 <span class="fa fa-newspaper-o"></span></li>
-                                        <li style="width:20%;">103 m</li>
-                                    </ul>
-                                </div>
-                                <div class="social">
-                                    <ul>
-                                        <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
-    
-                                    </ul>
-                                </div>
-                            </li>
+                            {{#each articles}}
+                                <li>
+                                    <time datetime="{{datetime}}">
+                                        <span class="day">{{day}}</span>
+                                        <span class="month">{{month}}</span>
+                                        <span class="year">{{year}}</span>
+                                    </time>
+                                    <div class="info">
+                                        <h2 class="title">{{heading}}</h2>
+                                        <p class="desc">{{short_text}}</p>
+                                        <ul>
+                                            <li style="width:25%;">{{nr_of_likes}} <span class="fa fa-thumbs-o-up"></span></a></li>
+                                            <li style="width:25%;">Read More </a><span class="fa fa-globe"></span></li>
+                                            <li style="width:25%;">{{nr_of_read}} <span class="fa fa-newspaper-o"></span></li>
+                                            <li style="width:25%;">{{distance}} m</li>
+                                        </ul>
+                                    </div>
+                                    <div class="social">
+                                        <ul>
+                                            <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
+                                            <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
+                                            <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
+        
+                                        </ul>
+                                    </div>
+                                </li>
+                            {{/each}}
 
                         </ul>
                     </div>
@@ -313,56 +316,40 @@
                 <div class="bs-example" id="news_around_you"> 
                     <div class="list-group"> 
                         <ul class="event-list">
-                            <li>
-                                <time datetime="2014-07-20 2000">
-                                    <span class="day">20</span>
-                                    <span class="month">Jan</span>
-                                    <span class="year">2014</span>
-                                    <span class="time">8:00 PM</span>
-                                </time>
-                                <div class="info">
-                                    <h2 class="title">Mouse0270's 24th Birthday!</h2>
-                                    <p class="desc">Bar Hopping in Erie, Pa.</p>
-                                    <ul>
-                                        <li style="width:20%;">5 <span class="fa fa-thumbs-o-up"></span></a></li>
-                                        <li style="width:20%;">Read More <span class="fa fa-globe"></span></li>
-                                        <li style="width:20%;">3 <span class="fa fa-newspaper-o"></span></li>
-                                        <li style="width:20%;">103 m</li>
-                                    </ul>
-                                </div>
-                                <div class="social">
-                                    <ul>
-                                        <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
-    
-                                    </ul>
-                                </div>
-                            </li>
+                            {{#each articles_around_me}}
+                                <li>
+                                    <time datetime="{{datetime}}">
+                                        <span class="day">{{day}}</span>
+                                        <span class="month">{{month}}</span>
+                                        <span class="year">{{year}}</span>
+                                    </time>
+                                    <div class="info">
+                                        <h2 class="title">{{heading}}</h2>
+                                        <p class="desc">{{short_text}}</p>
+                                        <ul>
+                                            <li style="width:25%;">{{nr_of_likes}} <span class="fa fa-thumbs-o-up"></span></a></li>
+                                            <li style="width:25%;">Read More </a><span class="fa fa-globe"></span></li>
+                                            <li style="width:25%;">{{nr_of_read}} <span class="fa fa-newspaper-o"></span></li>
+                                            <li style="width:25%;">{{distance}} m</li>
+                                        </ul>
+                                    </div>
+                                    <div class="social">
+                                        <ul>
+                                            <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
+                                            <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
+                                            <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
+        
+                                        </ul>
+                                    </div>
+                                </li>
+                            {{/each}}
 
                         </ul>
                     </div>
                 </div>
             </div>
-            <!-- <div class="col-sm-12 col-md-6">
-                <div class="list-group"> 
-                    <a href="#" class="list-group-item active"> 
-                        <h4 class="list-group-item-heading">List group item heading</h4> 
-                        <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
-                    </a> 
-                    <a href="#" class="list-group-item"> 
-                        <h4 class="list-group-item-heading">List group item heading</h4> 
-                        <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
-                    </a> 
-                    <a href="#" class="list-group-item"> 
-                        <h4 class="list-group-item-heading">List group item heading</h4> 
-                        <p class="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> 
-                    </a> 
-                </div>
-            </div> -->
-
         </div>
-    </div> 
+    </script>
 
     <!-- Footer -->
     <footer id='contact'>
@@ -413,6 +400,8 @@
 
     <script src="js/geocoder.js"></script>
     <script src="js/geocoder.min.js"></script>
+
+    <script src="js/handlebars-v3.0.3.js"></script>
 
     <!-- Custom javascript -->
     <script src="js/sz_app.js" charset="UTF-8"></script>

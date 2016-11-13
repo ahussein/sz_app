@@ -47,7 +47,7 @@ def _calculate_distance(loc1, loc2):
 	"""
 	from geopy.distance import great_circle
 	distance = great_circle(loc1, loc2)
-	return distance.m
+	return int(distance.m)
 
 class Article(Resource):
 	def get(self):

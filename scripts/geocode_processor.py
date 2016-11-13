@@ -231,7 +231,8 @@ def create_article(row_info, location):
 		},
 		'online_url': '',
 		'image': '',
-		'read_times': 0,
+		'nr_of_read': 0,
+		'nr_of_likes': 0
 
 	}
 	if location:

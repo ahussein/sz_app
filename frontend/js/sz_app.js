@@ -50,8 +50,7 @@ $(document).scroll(function() {
 });
 
 // result markers
-var news_markers = new Map();
-var current_result = {};
+var current_result = new Map();
 var articles_source_id = "articles";
 var current_user_location = new Array();
 var current_filters = {};
@@ -347,6 +346,38 @@ function update_map(data){
     current_layers.push(cluster_count_layer_id)
 }
 
+// function to update news list and people around me reading list
+function update_lists(data){
+    current_result.clear();
+    var articles = new Array();
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    for (var index=0; index < data.count; index++){
+        article = data.response[index];
+        var pub_date = article.pub_date.split(".")
+        var date = new Date(pub_date[2], pub_date[1], pub_date[0])
+        article.datetime = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " 0000";
+        article.day = date.getDate();
+        article.month = months[date.getMonth()];
+        article.year = date.getFullYear();
+        article.short_text = article.text.slice(0, 100) + "...";
+        article.distance = Math.trunc( article.distance );
+        if (article.online_url==""){
+            article.online_url = 'http://www.sz-online.de/'
+        }
+        if (!article.hasOwnProperty('nr_of_read')){
+            article.nr_of_read = 0;
+        }
+        if (!article.hasOwnProperty('nr_of_likes')){
+            article.nr_of_likes = 0;
+        }
+        current_result.set(article.dialog_id, article);
+        articles.push(article);
+    }
+    var source   = $("#articels-template").html();
+    var articles_template = Handlebars.compile(source);
+    $("#news_list_container").html(articles_template({articles: articles, articles_around_me: articles}))
+}
+
 // function to query the server and return the output
 function query_server(filters, on_success, on_error){
     filters.location.source = current_source_location;
@@ -369,9 +400,9 @@ function query_server(filters, on_success, on_error){
         success: function( response ) {
             // reponse
             console.log(response);
-            current_result = response;
             // call the update map function
             update_map(response);
+            update_lists(response);
             // call the on_success callback 
             if (on_success){
                 on_success(response)
