@@ -1,9 +1,13 @@
 server {
     listen 80;
-    server_name sz.de;
+    server_name 185.69.164.90;
     charset UTF-8;
     root /opt/sz_app/frontend;
     index index.html;
+
+    listen 443 ssl;
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
 
     location / {
 			     if ($request_method = 'OPTIONS') {

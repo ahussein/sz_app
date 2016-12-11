@@ -383,7 +383,7 @@ function query_server(filters, on_success, on_error){
     filters.location.source = current_source_location;
     query = {filters: filters, user_location: current_user_location};
     console.log(`Querying server with query ${query}`)
-    var url = 'http://185.69.164.90:8090/api';
+    var url = 'https://185.69.164.90:444/api';
     var type = 'post';
     var content_type = "application/json; charset=utf-8";
     var data = JSON.stringify(query)

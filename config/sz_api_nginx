@@ -1,7 +1,11 @@
 server {
     listen 8090;
-    server_name sz.de;
+    server_name 185.69.164.90;
     charset UTF-8;
+
+    listen 444 ssl;
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
 
     location / {
         include proxy_params;
