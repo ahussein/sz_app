@@ -67,6 +67,7 @@ class Article(Resource):
 			return mongo_jsonfy(result)
 
 		user_location = data.get('user_location', [])
+		requested_fields = data.get('fields', [])
 		filters = data.get('filters', {})
 		location_filter = filters.get('location', {})
 		text_filter = filters.get('text', "")
@@ -138,9 +139,15 @@ class Article(Resource):
 			if 'geometry' in article['address']:
 				article['geometry'] = article['address']['geometry']
 			article['type'] = 'Feature'
+			# filter requested fields
+			if requested_fields:
+				for key in article.keys():
+					if key not in requested_fields:
+						article.pop(key)
+
 
 		# make sure to sort by distance if locatio filter is enabled
-		if location_filter:
+		if location_filter and requested_fields and 'distance' in requested_fields:
 			from operator import itemgetter
 			found_articles.sort(key=itemgetter('distance'))
 		result = {'response': found_articles if found_articles else 'No articles found', 'count': len(found_articles)}

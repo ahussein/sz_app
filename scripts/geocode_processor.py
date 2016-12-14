@@ -166,6 +166,7 @@ Total number of records: %(nr_of_records)s
 
 Number of records with no location address: %(nr_location_records)s
 Number of records with failed geocoding: %(nr_failed_geocoding)s
+Number of records with multiple locations: %(nr_records_multi_location)s
 
 Errors: 
 %(errors)s
@@ -232,7 +233,8 @@ def create_article(row_info, location):
 		'online_url': '',
 		'image': '',
 		'nr_of_read': 0,
-		'nr_of_likes': 0
+		'nr_of_likes': 0,
+		'address_occurrence': 0
 
 	}
 	if location:
@@ -293,11 +295,12 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 		print('Failed to load address cache. Error: %s' % ex)
 
 	articles = []
-	result = {}
 	errors = []
+	records_with_multilocation = []
 	nr_of_records_with_no_address = 0
 	geocoder_obj = GeocoderFactory().get(geocoder_type=geocoder_type)
 	default_geocoder_obj = None
+	address_occurrence = {}
 	with open(input_file_path, 'rb') as fd:
 		reader = UnicodeReader(fd, delimiter=';')
 		header = reader.next()
@@ -318,40 +321,61 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 			location_address = row[-2]
 			article_id = row[0]
 			location = {}
-			# check if address already in the cache
-			if location_address in ADDRESS_CACHE:
-				location = ADDRESS_CACHE[location_address]
-			else:
-				if not location_address:
-					nr_of_records_with_no_address += 1
-					# print('Artical [%s] does not have location set' % article_id)
+			addresses = [location_address]
+			# check if there is multiple locations in the address text
+			if ', Deutschland,' in location_address:
+				records_with_multilocation.append(location_address)
+				location_address = location_address.replace(", Deutschland,", ", Deutschland|")
+				addresses = location_address.split("|")
+			for address in addresses:
+				# check if address already in the cache
+				if address in ADDRESS_CACHE:
+					location = ADDRESS_CACHE[address][0]
+					count = ADDRESS_CACHE[address][-1] + 1
+					ADDRESS_CACHE[address] = (location, count)
 				else:
-					try:
-						geocoder_result = geocoder_obj(location_address)
-						if geocoder_result.ok is False:
-							if geocoder_type != DEFAULT_GEOCODER_TYPE:
-								print("Failed to resolve address [%s] using geocoder [%s]. Trying default geocoder" % (location_address, geocoder_type))
-								if default_geocoder_obj is None:
-									default_geocoder_obj = GeocoderFactory().get(geocoder_type=DEFAULT_GEOCODER_TYPE)
-								geocoder_result = default_geocoder_obj(location_address)
-						if geocoder_result.ok is False:	
-							msg =  error_msg % (location_address, article_id, geocoder_result)
-							errors.append(msg)
-						else:
-							location = {'lat': geocoder_result.latlng[0], 
-										'lng': geocoder_result.latlng[1],
-										'bbox': geocoder_result.bbox}
-							ADDRESS_CACHE[location_address] = location
+					if not address:
+						nr_of_records_with_no_address += 1
+						# print('Artical [%s] does not have location set' % article_id)
+					else:
+						try:
+							geocoder_result = geocoder_obj(address)
+							if geocoder_result.ok is False:
+								if geocoder_type != DEFAULT_GEOCODER_TYPE:
+									print("Failed to resolve address [%s] using geocoder [%s]. Trying default geocoder" % (location_address, geocoder_type))
+									if default_geocoder_obj is None:
+										default_geocoder_obj = GeocoderFactory().get(geocoder_type=DEFAULT_GEOCODER_TYPE)
+									geocoder_result = default_geocoder_obj(address)
+							if geocoder_result.ok is False:	
+								msg =  error_msg % (location_address, article_id, geocoder_result)
+								errors.append(msg)
+							else:
+								location = {'lat': geocoder_result.latlng[0], 
+											'lng': geocoder_result.latlng[1],
+											'bbox': geocoder_result.bbox}
 
-					except Exception, ex:
-						msg =  error_msg % (location_address, article_id, ex)
-						errors.append(msg)
-			articles.append(create_article(row_info, location))
-			result[article_id] = location
+								if address == "Dresden, Deutschland":
+									import ipdb; ipdb.set_trace()
+
+								if address not in ADDRESS_CACHE:
+									ADDRESS_CACHE[address] = (location, 1)
+								
+
+						except Exception, ex:
+							msg =  error_msg % (address, article_id, ex)
+							errors.append(msg)
+				articles.append(create_article(row_info, location))
+
+	for article in articles:
+		loc_info = ADDRESS_CACHE.get(article['address']['text'], [])
+		if loc_info:
+			article['address_occurrence'] = loc_info[-1]
+
 	try:
 		save_addess_cache()
 	except Exception, ex:
 		print('Errors while saving address cache. Error: %s' % ex)
+
 
 	try:
 		populate_db(articles)
@@ -362,7 +386,9 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 								'nr_location_records': nr_of_records_with_no_address,
 								'nr_failed_geocoding': len(errors),
 								'errors': '\n'.join(errors),
-								'nr_of_records': index}
+								'nr_of_records': index,
+								'nr_records_multi_location': len(records_with_multilocation)}
+
 	print(report)
 
 

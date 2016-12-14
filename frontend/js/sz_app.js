@@ -232,22 +232,51 @@ var popup = new mapboxgl.Popup({
 map.on('click', function (e) {
     var features = map.queryRenderedFeatures(e.point, { layers: [articles_source_id] });
 
-    if (!features.length) {
-        return;
-    }
+    if (features.length) {
+        var feature = features[0];
 
-    var feature = features[0];
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        var div = window.document.createElement('div');
+        var text = feature.properties.text.slice(0, 200) + "...";
+        div.innerHTML = `<h5>${feature.properties.heading}</h5><p>${text}</p><a href='http://www.sz-online.de/' target="_blank">Read more</a>`;
+        var popup = new mapboxgl.Popup()
+            .setLngLat(feature.geometry.coordinates)
+            // .setHTML(feature.properties.text.slice(0, 200) + "...")
+            .setDOMContent(div)
+            .addTo(map);
+    }else{
+        // check if the clicked feature belong to cluster and based on the zoom level take the appropriate action
+        var cluster_layers = new Array();
+        current_layers.forEach(function(layer_id){
+            if(layer_id.startsWith('cluster-')){
+                cluster_layers.push(layer_id);
+            }
+        });
+        features = map.queryRenderedFeatures(e.point, {layers: cluster_layers});
+        if (features.length){
+                var feature = features[0];
+                var dialog_id_index;
+                feature._vectorTileFeature._keys.forEach(function(key, index){
+                    if (key == 'dialog_id'){
+                        dialog_id_index = index;
+                        return;
+                    }
+                });
+                if (dialog_id_index){
+                    var dialog_id = feature._vectorTileFeature._values[dialog_id_index];
+                    var target = $('#' + dialog_id);
+                    if (target.length) {
+                        $('html,body').animate({
+                            scrollTop: target.offset().top
+                        }, 1000);
+                        return false;
+                    }
+                }
+            }
+        }
 
-    // Populate the popup and set its coordinates
-    // based on the feature found.
-    var div = window.document.createElement('div');
-    var text = feature.properties.text.slice(0, 200) + "...";
-    div.innerHTML = `<h5>${feature.properties.heading}</h5><p>${text}</p><a href='http://www.sz-online.de/' target="_blank">Read more</a>`;
-    var popup = new mapboxgl.Popup()
-        .setLngLat(feature.geometry.coordinates)
-        // .setHTML(feature.properties.text.slice(0, 200) + "...")
-        .setDOMContent(div)
-        .addTo(map);
+
 });
 
 // Use the same approach as above to indicate that the symbols are clickable
@@ -264,7 +293,7 @@ function create_source(data){
         "type": "geojson",
         "data": {
             "type": "FeatureCollection",
-            "features": data.response
+            "features": data
         },
         "cluster": true,
         "clusterRadius": 10
@@ -287,8 +316,16 @@ function update_map(data){
     if (data.count == 0){
         return
     }
+    // filter the data based on the number of address_occurrence
+    filtered_data = new Array()
+    data.response.forEach(function(data_item, index){
+        if(data_item['address_occurrence'] < 5){
+            filtered_data.push(data_item)
+        }
+
+    });
     // create/update mapbox source
-    create_source(data);
+    create_source(filtered_data);
     // add layer
     map.addLayer({
         "id": articles_source_id,
@@ -329,7 +366,7 @@ function update_map(data){
     });
 
     // Add a layer for the clusters' count labels
-    var cluster_count_layer_id = "cluster-count";
+    var cluster_count_layer_id = "clustercount";
     map.addLayer({
         "id": cluster_count_layer_id,
         "type": "symbol",
@@ -383,7 +420,7 @@ function query_server(filters, on_success, on_error){
     filters.location.source = current_source_location;
     query = {filters: filters, user_location: current_user_location};
     console.log(`Querying server with query ${query}`)
-    var url = 'https://185.69.164.90:444/api';
+    var url = 'http://185.69.164.90:8000/api';
     var type = 'post';
     var content_type = "application/json; charset=utf-8";
     var data = JSON.stringify(query)
