@@ -58,6 +58,7 @@ var current_sources = new Array();
 var current_layers = new Array();
 var current_source_location = new Array();
 var current_location_marker = null;
+var map_to_list_zoom_threshold = 13;
 // mapbox 
 // L.mapbox.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
 // var map = L.mapbox.map('map', 'mapbox.streets')
@@ -247,42 +248,55 @@ map.on('click', function (e) {
             .addTo(map);
     }else{
         // check if the clicked feature belong to cluster and based on the zoom level take the appropriate action
-        var cluster_layers = new Array();
-        current_layers.forEach(function(layer_id){
-            if(layer_id.startsWith('cluster-')){
-                cluster_layers.push(layer_id);
-            }
-        });
-        features = map.queryRenderedFeatures(e.point, {layers: cluster_layers});
-        if (features.length){
-                var feature = features[0];
-                var dialog_id_index;
-                feature._vectorTileFeature._keys.forEach(function(key, index){
-                    if (key == 'dialog_id'){
-                        dialog_id_index = index;
-                        return;
-                    }
-                });
-                if (dialog_id_index){
-                    var dialog_id = feature._vectorTileFeature._values[dialog_id_index];
-                    var target = $('#' + dialog_id);
-                    if (target.length) {
-                        $('html,body').animate({
-                            scrollTop: target.offset().top
-                        }, 1000);
-                        return false;
+        var zoom = map.getZoom();
+        if (zoom > map_to_list_zoom_threshold){
+            var cluster_layers = new Array();
+            current_layers.forEach(function(layer_id){
+                if(layer_id.startsWith('cluster-')){
+                    cluster_layers.push(layer_id);
+                }
+            });
+            features = map.queryRenderedFeatures(e.point, {layers: cluster_layers});
+            if (features.length){
+                    var feature = features[0];
+                    var dialog_id_index;
+                    feature._vectorTileFeature._keys.forEach(function(key, index){
+                        if (key == 'dialog_id'){
+                            dialog_id_index = index;
+                            return;
+                        }
+                    });
+                    if (dialog_id_index){
+                        var dialog_id = feature._vectorTileFeature._values[dialog_id_index];
+                        var target = $('#' + dialog_id);
+                        if (target.length) {
+                            $('html,body').animate({
+                                scrollTop: target.offset().top
+                            }, 1000);
+                            return false;
+                        }
                     }
                 }
             }
-        }
 
+        }
 
 });
 
 // Use the same approach as above to indicate that the symbols are clickable
 // by changing the cursor style to 'pointer'.
 map.on('mousemove', function (e) {
-    var features = map.queryRenderedFeatures(e.point, { layers: [articles_source_id] });
+    var layers = new Array();
+    layers.push(articles_source_id);
+    // only add the cluster layers if the zoom level exceed the threshold
+    if (map.getZoom() > map_to_list_zoom_threshold){
+        current_layers.forEach(function(layer_id){
+        if(layer_id.startsWith('cluster-')){
+                layers.push(layer_id);
+            }
+        });
+    }
+    var features = map.queryRenderedFeatures(e.point, { layers: layers });
     map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
 });
 
