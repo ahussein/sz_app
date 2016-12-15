@@ -192,7 +192,7 @@ function fly_to(location){
     if(current_location_marker != null){
         current_location_marker.remove();
     }
-    create_marker('location', map, marker_data)
+    current_location_marker = create_marker('location', map, marker_data)
     // create a DOM element for the marker
     // var el = document.createElement('div');
     // el.className = 'marker';
@@ -240,7 +240,7 @@ map.on('click', function (e) {
         // based on the feature found.
         var div = window.document.createElement('div');
         var text = feature.properties.text.slice(0, 200) + "...";
-        div.innerHTML = `<h5>${feature.properties.heading}</h5><p>${text}</p><a href='http://www.sz-online.de/' target="_blank">Read more</a>`;
+        div.innerHTML = `<div class="container" style="max-width:400px"><h5>${feature.properties.heading}</h5><p>${text}</p><a class="js-read-popup" href='http://www.sz-online.de/' target="_blank">Read more</a></div>`;
         var popup = new mapboxgl.Popup()
             .setLngLat(feature.geometry.coordinates)
             // .setHTML(feature.properties.text.slice(0, 200) + "...")
@@ -259,15 +259,36 @@ map.on('click', function (e) {
             features = map.queryRenderedFeatures(e.point, {layers: cluster_layers});
             if (features.length){
                     var feature = features[0];
-                    var dialog_id_index;
-                    feature._vectorTileFeature._keys.forEach(function(key, index){
-                        if (key == 'dialog_id'){
-                            dialog_id_index = index;
-                            return;
-                        }
-                    });
-                    if (dialog_id_index){
-                        var dialog_id = feature._vectorTileFeature._values[dialog_id_index];
+                    var key = feature.geometry.coordinates[0] + "," + feature.geometry.coordinates[1];
+                    var dialog_id;
+                    if (current_result.has(key)){
+                        dialog_id = current_result.get(key);
+                    }
+                    // if we still cannot find the correct article in the list, then we query the server 
+                    // for the list of articles that are near the current click of the mouse
+                    if(!dialog_id){
+                        var filter = {
+                            location: {
+                                source: feature.geometry.coordinates,
+                                distance: 5
+                            }
+                        };
+                        query_server(filter, function(data){
+                            if(data.count){
+                                console.log(data.response);
+                                dialog_id = data.response[0].dialog_id;
+                                var target = $('#' + dialog_id);
+                                if (target.length) {
+                                    $('html,body').animate({
+                                        scrollTop: target.offset().top
+                                    }, 1000);
+                                    return false;
+                                }
+                            }
+
+                        },
+                            null, true, fields=["dialog_id"]);
+                    }else{
                         var target = $('#' + dialog_id);
                         if (target.length) {
                             $('html,body').animate({
@@ -275,7 +296,9 @@ map.on('click', function (e) {
                             }, 1000);
                             return false;
                         }
+
                     }
+                    
                 }
             }
 
@@ -421,7 +444,10 @@ function update_lists(data){
         if (!article.hasOwnProperty('nr_of_likes')){
             article.nr_of_likes = 0;
         }
-        current_result.set(article.dialog_id, article);
+        var key = article.address.geometry.coordinates[0] + "," + article.address.geometry.coordinates[1];
+        if (!current_result.has(key)){
+            current_result.set(key, article.dialog_id);
+        }
         articles.push(article);
     }
     var source   = $("#articels-template").html();
@@ -430,9 +456,10 @@ function update_lists(data){
 }
 
 // function to query the server and return the output
-function query_server(filters, on_success, on_error){
-    filters.location.source = current_source_location;
-    query = {filters: filters, user_location: current_user_location};
+// param no_update: if True then no default updateing of the map and lists will be executed
+function query_server(filters, on_success, on_error, no_update=false, fields=[]){
+    // filters.location.source = current_source_location;
+    query = {filters: filters, user_location: current_user_location, fields: fields};
     console.log(`Querying server with query ${query}`)
     var url = 'http://185.69.164.90:8000/api';
     var type = 'post';
@@ -451,9 +478,11 @@ function query_server(filters, on_success, on_error){
         success: function( response ) {
             // reponse
             console.log(response);
-            // call the update map function
-            update_map(response);
-            update_lists(response);
+            if(!no_update){
+                // call the update map function
+                update_map(response);
+                update_lists(response);
+            }
             // call the on_success callback 
             if (on_success){
                 on_success(response)
@@ -578,6 +607,7 @@ $(document).ready(function(){
             var source_location_text = document.getElementById("source_location_input").value
             if (source_location_text == ""){
                 current_source_location = current_user_location;
+                update_filters({location: {source : current_source_location, distance: current_filters.location.distance}})
                 fly_to(current_source_location);
             }else{
                 var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
@@ -585,6 +615,7 @@ $(document).ready(function(){
                         console.log(result);
                         if (result.length > 0){
                             current_source_location = [result[0].longitude, result[1].latitude];
+                            update_filters({location: {source : current_source_location, distance: current_filters.location.distance}})
                             fly_to(current_source_location);
                         }
                   });
