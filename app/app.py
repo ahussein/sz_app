@@ -52,11 +52,40 @@ def _calculate_distance(loc1, loc2):
 class Article(Resource):
 	def get(self):
 		data = []
-		cursor = mongo.db.articles.find().limit(10)
+		cursor = mongo.db.articles.find().limit(10)	
 		for article in cursor:
 			data.append(article)
 
 		return mongo_jsonfy({'response': data})
+
+
+	def put(self):
+		data = request.get_json()
+		print(data)
+		if not data:
+			result = {'response': "ERROR: No data provided"}
+			return mongo_jsonfy(result)
+		dialog_id = data.get('dialog_id', '')
+		current_user_location = data.get('user_location', '')
+		nr_of_read = data.get('nr_of_read', '')
+		nr_of_likes = data.get('nr_of_likes', '')
+		update_properties = {}
+		if dialog_id:
+			if type(nr_of_read) ==  int or (type(nr_of_read) == str and nr_of_read.isdigit()):
+				nr_of_read = int(nr_of_read)
+				update_properties['nr_of_read'] = nr_of_read
+			if type(nr_of_likes) ==  int or (type(nr_of_likes) == str and nr_of_likes.isdigit()):
+				nr_of_likes = int(nr_of_likes)
+				update_properties['nr_of_likes'] = nr_of_likes
+		try:
+			result = mongo.db.articles.update_many({'dialog_id': dialog_id}, {'$set': update_properties})
+		except Exception as ex:
+			result = {'response': "ERROR: %s" % ex}
+		else:
+			result = {'response': 'OK: %s records updated' % result.matched_count}
+		return mongo_jsonfy(result)
+
+
 
 
 	def post(self):
@@ -144,6 +173,9 @@ class Article(Resource):
 				for key in article.keys():
 					if key not in requested_fields:
 						article.pop(key)
+
+			if not article['online_url']:
+				article['online_url'] = "http://www.sz-online.de/"
 
 
 		# make sure to sort by distance if locatio filter is enabled

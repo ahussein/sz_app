@@ -230,7 +230,7 @@ def create_article(row_info, location):
 			'coordinates': [location['lng'], location['lat']] if location else [],
 			'bbox': location['bbox'] if location else {},
 		},
-		'online_url': '',
+		'online_url': row_info.get('oneline_url', 'http://www.sz-online.de/'),
 		'image': '',
 		'nr_of_read': 0,
 		'nr_of_likes': 0,

@@ -51,6 +51,7 @@ $(document).scroll(function() {
 
 // result markers
 var current_result = new Map();
+var dialog_id_article_map = new Map();
 var articles_source_id = "articles";
 var current_user_location = new Array();
 var current_filters = {};
@@ -228,6 +229,31 @@ var popup = new mapboxgl.Popup({
     closeOnClick: false
 });
 
+// update the number of read times of an article
+function update_read_count(article){
+    var url = 'http://185.69.164.90:8000/api';
+    var type = 'put';
+    var content_type = "application/json; charset=utf-8";
+    var query = {dialog_id: article.dialog_id, nr_of_read: article.nr_of_read + 1, user_location: current_user_location};
+    var data = JSON.stringify(query)
+
+    jQuery.ajax( {
+        url: url,
+        type: type,
+        contentType: content_type,
+        data: data,
+        success: function( response ) {
+            // reponse
+            console.log(response);
+            query_server(current_filters)
+        },
+        error: function (data){
+            // error
+            console.log(`Error: ${data}`);
+        }
+    } );
+}
+
 // When a click event occurs near a place, open a popup at the location of
 // the feature, with description HTML from its properties.
 map.on('click', function (e) {
@@ -240,12 +266,19 @@ map.on('click', function (e) {
         // based on the feature found.
         var div = window.document.createElement('div');
         var text = feature.properties.text.slice(0, 200) + "...";
-        div.innerHTML = `<div class="container" style="max-width:400px"><h5>${feature.properties.heading}</h5><p>${text}</p><a class="js-read-popup" href='http://www.sz-online.de/' target="_blank">Read more</a></div>`;
+        div.innerHTML = `<div class="container" style="max-width:400px"><h5>${feature.properties.heading}</h5><p>${text}</p><a id=${feature.properties.dialog_id} class="js-read-popup" href=${article.online} target="_blank">Read more</a></div>`;
         var popup = new mapboxgl.Popup()
             .setLngLat(feature.geometry.coordinates)
             // .setHTML(feature.properties.text.slice(0, 200) + "...")
             .setDOMContent(div)
             .addTo(map);
+        $(".js-read-popup").on('click', function(e){
+            var dialog_id = e.currentTarget.id;
+            if(dialog_id_article_map.has(dialog_id)){
+                var article = dialog_id_article_map.get(dialog_id);
+                update_read_count(article)
+            }
+        });
     }else{
         // check if the clicked feature belong to cluster and based on the zoom level take the appropriate action
         var zoom = map.getZoom();
@@ -262,7 +295,7 @@ map.on('click', function (e) {
                     var key = feature.geometry.coordinates[0] + "," + feature.geometry.coordinates[1];
                     var dialog_id;
                     if (current_result.has(key)){
-                        dialog_id = current_result.get(key);
+                        dialog_id = current_result.get(key).dialog_id;
                     }
                     // if we still cannot find the correct article in the list, then we query the server 
                     // for the list of articles that are near the current click of the mouse
@@ -338,7 +371,7 @@ function create_source(data){
     current_sources.push(articles_source_id);
 }
 
-// function to update the map with the latest filte rresults
+// function to update the map with the latest filter results
 function update_map(data){
     // cleaar the map source and layer
     current_layers.forEach(function(layer_id){
@@ -423,6 +456,7 @@ function update_map(data){
 // function to update news list and people around me reading list
 function update_lists(data){
     current_result.clear();
+    dialog_id_article_map.clear();
     var articles = new Array();
     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     for (var index=0; index < data.count; index++){
@@ -446,13 +480,21 @@ function update_lists(data){
         }
         var key = article.address.geometry.coordinates[0] + "," + article.address.geometry.coordinates[1];
         if (!current_result.has(key)){
-            current_result.set(key, article.dialog_id);
+            current_result.set(key, article);
+            dialog_id_article_map.set(article.dialog_id, article);
         }
         articles.push(article);
     }
     var source   = $("#articels-template").html();
     var articles_template = Handlebars.compile(source);
-    $("#news_list_container").html(articles_template({articles: articles, articles_around_me: articles}))
+    $("#news_list_container").html(articles_template({articles: articles, articles_around_me: articles}));
+    $(".js-read-popup").on('click', function(e){
+        var dialog_id = e.currentTarget.id;
+        if(dialog_id_article_map.has(dialog_id)){
+            var article = dialog_id_article_map.get(dialog_id);
+            update_read_count(article)
+        }
+    });
 }
 
 // function to query the server and return the output
@@ -622,6 +664,7 @@ $(document).ready(function(){
             }   
         }
     });
+
 });
 
 
