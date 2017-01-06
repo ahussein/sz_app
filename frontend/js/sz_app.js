@@ -229,6 +229,31 @@ var popup = new mapboxgl.Popup({
     closeOnClick: false
 });
 
+// update the number of likes of an article
+function update_like_count(article){
+    var url = 'http://185.69.164.90:8000/api';
+    var type = 'put';
+    var content_type = "application/json; charset=utf-8";
+    var query = {dialog_id: article.dialog_id, nr_of_likes: article.nr_of_likes + 1, user_location: current_user_location};
+    var data = JSON.stringify(query)
+
+    jQuery.ajax( {
+        url: url,
+        type: type,
+        contentType: content_type,
+        data: data,
+        success: function( response ) {
+            // reponse
+            console.log(response);
+            query_server(current_filters)
+        },
+        error: function (data){
+            // error
+            console.log(`Error: ${data}`);
+        }
+    } );
+}
+
 // update the number of read times of an article
 function update_read_count(article){
     var url = 'http://185.69.164.90:8000/api';
@@ -493,6 +518,14 @@ function update_lists(data){
         if(dialog_id_article_map.has(dialog_id)){
             var article = dialog_id_article_map.get(dialog_id);
             update_read_count(article)
+        }
+    });
+
+    $(".js-like").on('click', function(e){
+        var dialog_id = e.currentTarget.id;
+        if(dialog_id_article_map.has(dialog_id)){
+            var article = dialog_id_article_map.get(dialog_id);
+            update_like_count(article)
         }
     });
 }
