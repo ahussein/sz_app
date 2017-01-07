@@ -408,12 +408,12 @@ function update_map(data){
     current_layers = new Array();
     current_sources = new Array();
     
-    if (data.count == 0){
+    if (data.filtered_articles.count == 0){
         return
     }
     // filter the data based on the number of address_occurrence
     filtered_data = new Array()
-    data.response.forEach(function(data_item, index){
+    data.filtered_articles.response.forEach(function(data_item, index){
         if(data_item['address_occurrence'] < 5){
             filtered_data.push(data_item)
         }
@@ -483,9 +483,10 @@ function update_lists(data){
     current_result.clear();
     dialog_id_article_map.clear();
     var articles = new Array();
+    var popular_articles = new Array();
     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    for (var index=0; index < data.count; index++){
-        article = data.response[index];
+    for (var index=0; index < data.filtered_articles.count; index++){
+        article = data.filtered_articles.response[index];
         var pub_date = article.pub_date.split(".")
         var date = new Date(pub_date[2], pub_date[1], pub_date[0])
         article.datetime = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " 0000";
@@ -510,9 +511,37 @@ function update_lists(data){
         }
         articles.push(article);
     }
+    for (var index=0; index < data.popular_articles.count; index++){
+        article = data.popular_articles.response[index];
+        var pub_date = article.pub_date.split(".")
+        var date = new Date(pub_date[2], pub_date[1], pub_date[0])
+        article.datetime = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " 0000";
+        article.day = date.getDate();
+        article.month = months[date.getMonth()];
+        article.year = date.getFullYear();
+        article.short_text = article.text.slice(0, 100) + "...";
+        article.distance = Math.trunc( article.distance );
+        if (article.online_url==""){
+            article.online_url = 'http://www.sz-online.de/'
+        }
+        if (!article.hasOwnProperty('nr_of_read')){
+            article.nr_of_read = 0;
+        }
+        if (!article.hasOwnProperty('nr_of_likes')){
+            article.nr_of_likes = 0;
+        }
+
+        var key = article.address.geometry.coordinates[0] + "," + article.address.geometry.coordinates[1];
+        if (!current_result.has(key)){
+            current_result.set(key, article);
+            dialog_id_article_map.set(article.dialog_id, article);
+        }
+        
+        popular_articles.push(article);
+    }
     var source   = $("#articels-template").html();
     var articles_template = Handlebars.compile(source);
-    $("#news_list_container").html(articles_template({articles: articles, articles_around_me: articles}));
+    $("#news_list_container").html(articles_template({articles: articles, articles_around_me: popular_articles}));
     $(".js-read-popup").on('click', function(e){
         var dialog_id = e.currentTarget.id;
         if(dialog_id_article_map.has(dialog_id)){

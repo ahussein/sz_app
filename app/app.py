@@ -35,6 +35,9 @@ article_categories_map = {
 
 article_categories_reverse_map = {v: k for k, v in article_categories_map.iteritems()}
 
+MAX_NR_OF_POPULAR_ARTICLES = 20
+
+
 def mongo_jsonfy(data):
 	"""
 	Jsonfy version that works with mongo bson data
@@ -104,7 +107,9 @@ class Article(Resource):
 		time_filter = filters.get("time", [])
 		query_kwargs = {}
 		query = {}
+		popular_news_query = {}
 		found_articles = []
+		popular_articles = []
 		all_filters_articles_ids = set([])
 		if location_filter:
 			# for location filter we expect a source point [lat, lng] and a distance in meters
@@ -144,6 +149,16 @@ class Article(Resource):
 			for article in mongo.db.articles.find(query, **query_kwargs):
 				found_articles.append(article)
 
+
+		# popular news query
+		if location_filter and user_location:
+			popular_news_query.update({"address.geometry": { "$nearSphere": { "$geometry": { "type": "Point", "coordinates": user_location }, 
+						"$maxDistance": location_filter['distance'] } } })
+			for article in mongo.db.articles.find(popular_news_query).sort([('nr_of_likes', -1), ('nr_of_read', -1)]).limit(MAX_NR_OF_POPULAR_ARTICLES):
+				article['pub_date'] = datetime.datetime.fromtimestamp(article['pub_date']).strftime('%d.%m.%Y')
+				article['distance'] = _calculate_distance(article['address']['geometry']['coordinates'], user_location)
+				popular_articles.append(article)
+
 		for article in found_articles:
 			# clean the article reault
 			# article.pop('text')
@@ -168,21 +183,25 @@ class Article(Resource):
 			if 'geometry' in article['address']:
 				article['geometry'] = article['address']['geometry']
 			article['type'] = 'Feature'
+
+			if not article['online_url']:
+				article['online_url'] = "http://www.sz-online.de/"
+
 			# filter requested fields
 			if requested_fields:
 				for key in article.keys():
 					if key not in requested_fields:
 						article.pop(key)
 
-			if not article['online_url']:
-				article['online_url'] = "http://www.sz-online.de/"
-
 
 		# make sure to sort by distance if locatio filter is enabled
 		if location_filter and requested_fields and 'distance' in requested_fields:
 			from operator import itemgetter
 			found_articles.sort(key=itemgetter('distance'))
-		result = {'response': found_articles if found_articles else 'No articles found', 'count': len(found_articles)}
+		result = { 
+			'filtered_articles' : {'response': found_articles if found_articles else 'No articles found', 'count': len(found_articles)},
+			'popular_articles': {'response': popular_articles if popular_articles else 'No articles found', 'count': len(popular_articles)}
+			}
 		return mongo_jsonfy(result)
 
 

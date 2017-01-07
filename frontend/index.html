@@ -64,7 +64,7 @@
                 <a href="#news_list" onclick=$("#menu-close").click();>News list</a>
             </li>
             <li>
-                <a href="#news_around_you" onclick=$("#menu-close").click();>People around me reading...</a>
+                <a href="#news_around_you" onclick=$("#menu-close").click();>Popular News around me...</a>
             </li>
             <li>
                 <a href="#contact" onclick=$("#menu-close").click();>Contact</a>
@@ -292,7 +292,7 @@
                                         <h2 class="title">{{heading}}</h2>
                                         <p class="desc">{{short_text}}</p>
                                         <ul>
-                                            <li style="width:25%;">{{nr_of_likes}} <a id={{dialog_id}} class="js-like" style="display:inline;"><span class="fa fa-thumbs-o-up"></span></a></li>
+                                            <li class="js-like" id={{dialog_id}} style="width:25%;">{{nr_of_likes}} <span class="fa fa-thumbs-o-up"></span></li>
                                             <li style="width:25%;"><a id={{dialog_id}} class="js-read-popup" href={{online_url}} target="_blank">Read More</a><span class="fa fa-globe"></span></li>
                                             <li style="width:25%;">{{nr_of_read}} <span class="fa fa-newspaper-o"></span></li>
                                             <li style="width:25%;">{{distance}} m</li>
@@ -328,7 +328,7 @@
                                         <h2 class="title">{{heading}}</h2>
                                         <p class="desc">{{short_text}}</p>
                                         <ul>
-                                            <li style="width:25%;">{{nr_of_likes}} <a id={{dialog_id}} class="js-like" style="display:inline;"><span class="fa fa-thumbs-o-up"></span></a></li>
+                                            <li class="js-like" id={{dialog_id}} style="width:25%;">{{nr_of_likes}} <span class="fa fa-thumbs-o-up"></span></li>
                                             <li style="width:25%;"><a id={{dialog_id}} class="js-read-popup" href={{online_url}} target="_blank">Read More</a><span class="fa fa-globe"></span></li>
                                             <li style="width:25%;">{{nr_of_read}} <span class="fa fa-newspaper-o"></span></li>
                                             <li style="width:25%;">{{distance}} m</li>
@@ -406,32 +406,6 @@
 
     <!-- Custom javascript -->
     <script src="js/sz_app.js" charset="UTF-8"></script>
-
-    <!-- Custom Theme JavaScript -->
-    <script>
-   
-
-    // Disable Google Maps scrolling
-    // See http://stackoverflow.com/a/25904582/1607849
-    // Disable scroll zooming and bind back the click event
-    // var onMapMouseleaveHandler = function(event) {
-    //     var that = $(this);
-    //     that.on('click', onMapClickHandler);
-    //     that.off('mouseleave', onMapMouseleaveHandler);
-    //     that.find('iframe').css("pointer-events", "none");
-    // }
-    // var onMapClickHandler = function(event) {
-    //         var that = $(this);
-    //         // Disable the click handler until the user leaves the map area
-    //         that.off('click', onMapClickHandler);
-    //         // Enable scrolling zoom
-    //         that.find('iframe').css("pointer-events", "auto");
-    //         // Handle the mouse leave event
-    //         that.on('mouseleave', onMapMouseleaveHandler);
-    //     }
-    //     // Enable map zooming with mouse scroll when the user clicks the map
-    // $('.map').on('click', onMapClickHandler);
-    </script>
 
 </body>
 
