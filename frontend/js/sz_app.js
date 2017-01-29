@@ -231,7 +231,7 @@ var popup = new mapboxgl.Popup({
 
 // update the number of likes of an article
 function update_like_count(article){
-    var url = 'http://185.69.164.90:8000/api';
+    var url = 'https://185.69.164.90:444/api';
     var type = 'put';
     var content_type = "application/json; charset=utf-8";
     var query = {dialog_id: article.dialog_id, nr_of_likes: article.nr_of_likes + 1, user_location: current_user_location};
@@ -256,7 +256,7 @@ function update_like_count(article){
 
 // update the number of read times of an article
 function update_read_count(article){
-    var url = 'http://185.69.164.90:8000/api';
+    var url = 'https://185.69.164.90:444/api';
     var type = 'put';
     var content_type = "application/json; charset=utf-8";
     var query = {dialog_id: article.dialog_id, nr_of_read: article.nr_of_read + 1, user_location: current_user_location};
@@ -414,7 +414,7 @@ function update_map(data){
     // filter the data based on the number of address_occurrence
     filtered_data = new Array()
     data.filtered_articles.response.forEach(function(data_item, index){
-        if(data_item['address_occurrence'] < 5){
+        if(data_item['address_occurrence'] < 10){
             filtered_data.push(data_item)
         }
 
@@ -565,7 +565,7 @@ function query_server(filters, on_success, on_error, no_update=false, fields=[])
     // filters.location.source = current_source_location;
     query = {filters: filters, user_location: current_user_location, fields: fields};
     console.log(`Querying server with query ${query}`)
-    var url = 'http://185.69.164.90:8000/api';
+    var url = 'https://185.69.164.90:444/api';
     var type = 'post';
     var content_type = "application/json; charset=utf-8";
     var data = JSON.stringify(query)

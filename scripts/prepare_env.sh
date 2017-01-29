@@ -1,6 +1,11 @@
 #!/bin/bash
 
 sudo su -
+
+# install dev packages
+apt-get install -y build-essential autoconf libtool pkg-config python-opengl python-imaging python-pyrex python-pyside.qtopengl idle-python2.7 qt4-dev-tools qt4-designer libqtgui4 libqtcore4 libqt4-xml libqt4-test libqt4-script libqt4-network libqt4-dbus python-qt4 python-qt4-gl libgle3 python-de
+apt-get install -y python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
+
 # install mongodb
 
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
@@ -50,4 +55,4 @@ env/bin/pip install -r requirements.txt
 start backend_sz_app
 
 # restart nginx
-service nginx resstart
+service nginx restart

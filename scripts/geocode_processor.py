@@ -36,6 +36,9 @@ articles = [
 	},
 	'online_url': '',
 	'image': '',
+	'nr_of_read': 0,
+	'nr_of_likes': 0,
+	'address_occurrence': 0
 },
 ]
 """
@@ -354,8 +357,6 @@ def main(input_file_path, geocoder_type=DEFAULT_GEOCODER_TYPE):
 											'lng': geocoder_result.latlng[1],
 											'bbox': geocoder_result.bbox}
 
-								if address == "Dresden, Deutschland":
-									import ipdb; ipdb.set_trace()
 
 								if address not in ADDRESS_CACHE:
 									ADDRESS_CACHE[address] = (location, 1)
