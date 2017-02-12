@@ -60,16 +60,11 @@ var current_layers = new Array();
 var current_source_location = new Array();
 var current_location_marker = null;
 var map_to_list_zoom_threshold = 13;
-// mapbox 
-// L.mapbox.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
-// var map = L.mapbox.map('map', 'mapbox.streets')
-// .setView([51.029007, 13.736552], 13);
 
 // mapbox gl
 mapboxgl.accessToken = 'pk.eyJ1IjoiYWJkZWxyYWhtYW5odXNzZWluIiwiYSI6ImE1NTdkM2NjNzBlYWViZDZlYzg3ODVjNDZkYTk4MTJiIn0.94E8T4tbJCKrPIdyQL-TzQ';
 var map = new mapboxgl.Map({
     container: 'map',
-    // style: 'mapbox://styles/mapbox/light-v9'
     style: 'mapbox://styles/abdelrahmanhussein/civ307qxk000u2iozvu6xz1rx'
 });
 
@@ -229,12 +224,15 @@ var popup = new mapboxgl.Popup({
     closeOnClick: false
 });
 
-// update the number of likes of an article
-function update_like_count(article){
-    var url = 'https://185.69.164.90:444/api';
+//update the article
+function update_article(query){
+    if (window.location.protocol !=  'https:'){
+        var url = 'http://185.69.164.90:8090/api';
+    }else{
+        var url = 'https://185.69.164.90:444/api';
+    }
     var type = 'put';
     var content_type = "application/json; charset=utf-8";
-    var query = {dialog_id: article.dialog_id, nr_of_likes: article.nr_of_likes + 1, user_location: current_user_location};
     var data = JSON.stringify(query)
 
     jQuery.ajax( {
@@ -254,29 +252,16 @@ function update_like_count(article){
     } );
 }
 
+// update the number of likes of an article
+function update_like_count(article){
+    var query = {dialog_id: article.dialog_id, nr_of_likes: article.nr_of_likes + 1, user_location: current_user_location};
+    update_article(query)
+}
+
 // update the number of read times of an article
 function update_read_count(article){
-    var url = 'https://185.69.164.90:444/api';
-    var type = 'put';
-    var content_type = "application/json; charset=utf-8";
     var query = {dialog_id: article.dialog_id, nr_of_read: article.nr_of_read + 1, user_location: current_user_location};
-    var data = JSON.stringify(query)
-
-    jQuery.ajax( {
-        url: url,
-        type: type,
-        contentType: content_type,
-        data: data,
-        success: function( response ) {
-            // reponse
-            console.log(response);
-            query_server(current_filters)
-        },
-        error: function (data){
-            // error
-            console.log(`Error: ${data}`);
-        }
-    } );
+    update_article(query)
 }
 
 // When a click event occurs near a place, open a popup at the location of
@@ -332,6 +317,7 @@ map.on('click', function (e) {
                             }
                         };
                         query_server(filter, function(data){
+                            data = data.filtered_articles;
                             if(data.count){
                                 console.log(data.response);
                                 dialog_id = data.response[0].dialog_id;
@@ -414,7 +400,7 @@ function update_map(data){
     // filter the data based on the number of address_occurrence
     filtered_data = new Array()
     data.filtered_articles.response.forEach(function(data_item, index){
-        if(data_item['address_occurrence'] < 10){
+        if(data_item['address_occurrence'] < 100000){
             filtered_data.push(data_item)
         }
 
@@ -565,7 +551,11 @@ function query_server(filters, on_success, on_error, no_update=false, fields=[])
     // filters.location.source = current_source_location;
     query = {filters: filters, user_location: current_user_location, fields: fields};
     console.log(`Querying server with query ${query}`)
-    var url = 'https://185.69.164.90:444/api';
+    if (window.location.protocol !=  'https:'){
+        var url = 'http://185.69.164.90:8090/api';
+    }else{
+        var url = 'https://185.69.164.90:444/api';
+    }
     var type = 'post';
     var content_type = "application/json; charset=utf-8";
     var data = JSON.stringify(query)

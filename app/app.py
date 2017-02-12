@@ -53,14 +53,6 @@ def _calculate_distance(loc1, loc2):
 	return int(distance.m)
 
 class Article(Resource):
-	def get(self):
-		data = []
-		cursor = mongo.db.articles.find().limit(10)	
-		for article in cursor:
-			data.append(article)
-
-		return mongo_jsonfy({'response': data})
-
 
 	def put(self):
 		data = request.get_json()
@@ -87,8 +79,6 @@ class Article(Resource):
 		else:
 			result = {'response': 'OK: %s records updated' % result.matched_count}
 		return mongo_jsonfy(result)
-
-
 
 
 	def post(self):
@@ -157,6 +147,11 @@ class Article(Resource):
 			for article in mongo.db.articles.find(popular_news_query).sort([('nr_of_likes', -1), ('nr_of_read', -1)]).limit(MAX_NR_OF_POPULAR_ARTICLES):
 				article['pub_date'] = datetime.datetime.fromtimestamp(article['pub_date']).strftime('%d.%m.%Y')
 				article['distance'] = _calculate_distance(article['address']['geometry']['coordinates'], user_location)
+				# filter requested fields
+				if requested_fields:
+					for key in article.keys():
+						if key not in requested_fields:
+							article.pop(key)
 				popular_articles.append(article)
 
 		for article in found_articles:

@@ -249,20 +249,6 @@ hr.small {
     }
 }
 
-/*.map {
-    height: 600px;
-}
-
-@media(max-width:768px) {
-    .map {
-        height: 75%;
-    }
-}
-
-.map iframe {
-    pointer-events: none;
-}
-*/
 /* Footer */
 
 footer {
@@ -378,4 +364,8 @@ footer {
 
 #news_around_you:after{
     content: "Popular News around me..."; 
+}
+
+.topicbox{
+    padding-bottom: 1px;    
 }
